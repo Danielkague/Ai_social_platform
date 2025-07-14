@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/auth-context"
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    emailOrUsername: "",
+    email: "",
     password: "",
   })
   const [error, setError] = useState("")
@@ -27,17 +27,11 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
     setIsLoading(true)
-
     try {
-      const result = await login(formData.emailOrUsername, formData.password)
-
-      if (result.success) {
-        router.push("/")
-      } else {
-        setError(result.error || "Login failed")
-      }
-    } catch (err) {
-      setError("An unexpected error occurred")
+      await login({ email: formData.email, password: formData.password })
+      router.push("/")
+    } catch (err: any) {
+      setError(err.message || "Invalid email or password")
     } finally {
       setIsLoading(false)
     }
@@ -51,98 +45,54 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Shield className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">SafeSocial</h1>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <Card className="w-full max-w-md p-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ArrowRight className="w-6 h-6" /> Sign In
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Don't have an account?{' '}
+            <Link href="/register" className="text-blue-600 hover:underline">
+              Sign up
+            </Link>
           </div>
-          <p className="text-gray-600">Welcome back! Sign in to your account</p>
-        </div>
-
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-center">Sign In</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="emailOrUsername">Email or Username</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="emailOrUsername"
-                    name="emailOrUsername"
-                    type="text"
-                    placeholder="Enter your email or username"
-                    value={formData.emailOrUsername}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Signing in...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    Sign In
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
-                <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Sign up
-                </Link>
-              </p>
-            </div>
-
-            {/* Demo Credentials */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-xs text-blue-800 font-medium mb-1">Demo Instructions:</p>
-              <p className="text-xs text-blue-700">
-                Since this is a demo, you can use any email and password to login after registering, or create a new
-                account.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

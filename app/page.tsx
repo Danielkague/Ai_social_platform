@@ -12,28 +12,39 @@ import SupportChatbot from "./components/support-chatbot"
 import MLStatus from "./components/ml-status"
 import ProtectedRoute from "@/components/protected-route"
 import { useAuth } from "@/contexts/auth-context"
+import CommentsSection from "@/components/comments-section"
+import PostLikes from "@/components/post-likes"
+import { useRouter } from "next/navigation"
 
 interface Post {
   id: number
   content: string
-  username: string
-  fullName: string
   timestamp: string
   flagged: boolean
-  moderationStatus: string
+  moderation_status: string
   severity?: string
   categories?: string[]
   confidence?: number
-  userId: number
-  avatar?: string
+  user_id: string
+  profiles?: {
+    username: string
+    avatar?: string
+    full_name?: string
+  }
 }
 
 function SocialMediaPlatform() {
-  const [posts, setPosts] = useState<Post[]>([])
+  const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState("")
   const [showSupportChat, setShowSupportChat] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, profile, logout } = useAuth()
+  const [reportingPostId, setReportingPostId] = useState<number | null>(null)
+  const [postReportReason, setPostReportReason] = useState("")
+  const [postReportError, setPostReportError] = useState("")
+  const [postReportSuccess, setPostReportSuccess] = useState("")
+  const [postsError, setPostsError] = useState<string>("");
+  const router = useRouter();
 
   useEffect(() => {
     fetchPosts()
@@ -41,13 +52,24 @@ function SocialMediaPlatform() {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch("/api/posts")
-      const data = await response.json()
-      setPosts(data)
+      const response = await fetch("/api/posts");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setPosts(data);
+        setPostsError("");
+      } else if (data && data.error) {
+        setPosts([]);
+        setPostsError(data.error);
+      } else {
+        setPosts([]);
+        setPostsError("Unexpected response from server.");
+      }
     } catch (error) {
-      console.error("Failed to fetch posts:", error)
+      console.error("Failed to fetch posts:", error);
+      setPosts([]);
+      setPostsError("Failed to fetch posts.");
     }
-  }
+  };
 
   const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,9 +85,7 @@ function SocialMediaPlatform() {
         body: JSON.stringify({
           content: newPost,
           userId: user.id,
-          username: user.username,
-          fullName: user.fullName,
-          avatar: user.avatar,
+          ipAddress: null // Optionally, you can get the user's IP from the backend
         }),
       })
 
@@ -84,103 +104,92 @@ function SocialMediaPlatform() {
     return new Date(timestamp).toLocaleString()
   }
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  }
+
+  const handleReportPost = (postId: number) => {
+    setReportingPostId(postId)
+  }
+  const submitPostReport = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || !reportingPostId || !postReportReason.trim()) return
+    setPostReportError("")
+    setPostReportSuccess("")
+    const post = posts.find((p) => p.id === reportingPostId)
+    const reportedUserId = post?.user_id
+    try {
+      const res = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reporterId: user.id,
+          reportedUserId,
+          postId: reportingPostId,
+          reason: postReportReason
+        })
+      })
+      if (res.ok) {
+        setPostReportSuccess("Report submitted. Thank you!")
+        setPostReportReason("")
+        setReportingPostId(null)
+      } else {
+        const data = await res.json()
+        setPostReportError(data.error || "Failed to submit report")
+      }
+    } catch (err: any) {
+      setPostReportError("Failed to submit report")
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-blue-600">SafeSocial</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-gray-600">AI Protection Active</span>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <header className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow">
+              {profile?.full_name?.[0]?.toUpperCase() || profile?.username?.[0]?.toUpperCase()}
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-blue-900">Welcome, {profile?.full_name || profile?.username}!</h2>
+              <p className="text-xs text-blue-700">Member since {profile?.join_date ? new Date(profile.join_date).toLocaleDateString() : "today"}.</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            {/* User Profile */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                {user?.fullName?.[0]?.toUpperCase() || "U"}
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-sm font-medium">{user?.fullName}</p>
-                <p className="text-xs text-gray-500">@{user?.username}</p>
-              </div>
-            </div>
-
-            <Button variant="outline" onClick={() => setShowSupportChat(true)} className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Support & Safety</span>
-            </Button>
-
-            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2 bg-transparent">
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-4xl mx-auto px-4 py-6">
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="w-4 h-4" /> Logout
+          </Button>
+        </header>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
-            
-          </div>
+          <div className="lg:col-span-2"></div>
           <div>
             <MLStatus />
           </div>
         </div>
-
-        {/* Welcome Message */}
-        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-lg font-bold">
-                {user?.fullName?.[0]?.toUpperCase()}
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-blue-900">Welcome back, {user?.fullName}!</h2>
-                <p className="text-sm text-blue-700">
-                  Share your thoughts in our AI-protected community. Member since{" "}
-                  {user?.joinDate ? new Date(user.joinDate).toLocaleDateString() : "today"}.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Post Creation */}
-        <Card className="mb-6">
+        <Card className="mb-8 shadow-lg border-blue-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              Share your thoughts
+              <MessageCircle className="w-5 h-5" /> Share your thoughts
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitPost} className="space-y-4">
               <div className="flex gap-3">
                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                  {user?.fullName?.[0]?.toUpperCase()}
+                  {profile?.full_name?.[0]?.toUpperCase() || profile?.username?.[0]?.toUpperCase()}
                 </div>
                 <Textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  placeholder={`What's on your mind, ${user?.fullName?.split(" ")[0]}?`}
-                  className="min-h-[100px] flex-1"
+                  placeholder={`What's on your mind, ${profile?.full_name?.split(" ")[0] || profile?.username}?`}
+                  className="min-h-[100px] flex-1 bg-blue-50 border-blue-200 focus:ring-blue-400"
                   maxLength={500}
+                  aria-label="Post content"
                 />
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Shield className="w-4 h-4" />
-                  AI moderation enabled
+                  <Shield className="w-4 h-4" /> AI moderation enabled
                   <span className="text-xs">({newPost.length}/500)</span>
                 </div>
                 <Button type="submit" disabled={isPosting || !newPost.trim()}>
@@ -190,54 +199,52 @@ function SocialMediaPlatform() {
             </form>
           </CardContent>
         </Card>
-
-        {/* Posts Feed */}
-        <div className="space-y-4">
-          {posts.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-2">No posts yet in your feed</p>
-                <p className="text-sm text-gray-400">Be the first to share something with the community!</p>
-              </CardContent>
-            </Card>
-          ) : (
-            posts.map((post) => (
-              <Card key={post.id} className="hover:shadow-md transition-shadow">
+        {postsError && (
+          <Card className="shadow">
+            <CardContent className="text-center py-8">
+              <p className="text-red-600 mb-2">{postsError}</p>
+            </CardContent>
+          </Card>
+        )}
+        {posts.length === 0 ? (
+          <Card className="shadow">
+            <CardContent className="text-center py-8">
+              <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 mb-2">No posts yet in your feed</p>
+              <p className="text-sm text-gray-400">Be the first to share something with the community!</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-8">
+            {posts.map((post) => (
+              <Card key={post.id} className="hover:shadow-lg transition-shadow border-blue-100">
                 <CardContent className="pt-4">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                        {post.fullName?.[0]?.toUpperCase() || post.username[0].toUpperCase()}
+                        {post.profiles?.full_name?.[0]?.toUpperCase() || post.profiles?.username?.[0]?.toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-semibold">{post.fullName || post.username}</p>
+                        <p className="font-semibold">{post.profiles?.full_name || post.profiles?.username}</p>
                         <p className="text-sm text-gray-500">
-                          @{post.username} • {formatTimestamp(post.timestamp)}
+                          @{post.profiles?.username} • {formatTimestamp(post.timestamp)}
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      {post.moderationStatus === "approved" && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Shield className="w-3 h-3" />
-                          Verified Safe
-                        </Badge>
-                      )}
-                      {post.moderationStatus === "flagged" && (
-                        <Badge variant="destructive" className="flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3" />
-                          {post.severity === "critical" ? "Critical" : 
-                           post.severity === "high" ? "High Risk" : 
-                           post.severity === "medium" ? "Medium Risk" : "Flagged"}
-                        </Badge>
-                      )}
-                    </div>
+                    {post.moderation_status === "approved" && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Shield className="w-3 h-3" /> Verified Safe
+                      </Badge>
+                    )}
+                    {post.moderation_status === "flagged" && (
+                      <Badge variant="destructive" className="flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        {post.severity === "critical" ? "Critical" : post.severity === "high" ? "High Risk" : post.severity === "medium" ? "Medium Risk" : "Flagged"}
+                      </Badge>
+                    )}
                   </div>
-                  <p className="text-gray-800 leading-relaxed mb-4">{post.content}</p>
-                  
-                  {/* Moderation Details */}
-                  {post.moderationStatus === "flagged" && (
+                  <p className="text-gray-800 leading-relaxed mb-4 text-base">{post.content}</p>
+                  {post.moderation_status === "flagged" && (
                     <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <AlertTriangle className="w-4 h-4 text-red-600" />
@@ -256,34 +263,45 @@ function SocialMediaPlatform() {
                       </div>
                     </div>
                   )}
-                  <div className="flex items-center gap-4 pt-3 border-t">
+                  <div className="flex items-center gap-4 pt-3 border-t mt-2">
+                    <PostLikes postId={post.id} />
                     <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                      <Heart className="w-4 h-4" />
-                      Like
-                    </Button>
-                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                      <MessageCircle className="w-4 h-4" />
-                      Comment
+                      <MessageCircle className="w-4 h-4" /> Comment
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       className="flex items-center gap-2 text-red-600 hover:text-red-700"
-                      onClick={() => setShowSupportChat(true)}
+                      onClick={() => handleReportPost(post.id)}
                     >
-                      <AlertTriangle className="w-4 h-4" />
-                      Report
+                      <AlertTriangle className="w-4 h-4" /> Report
                     </Button>
                   </div>
+                  {reportingPostId === post.id && (
+                    <form onSubmit={submitPostReport} className="mt-2 flex flex-col gap-2 bg-red-50 p-2 rounded">
+                      <textarea
+                        value={postReportReason}
+                        onChange={(e) => setPostReportReason(e.target.value)}
+                        placeholder="Describe the issue..."
+                        className="border rounded p-1 text-sm"
+                        required
+                      />
+                      <div className="flex gap-2">
+                        <Button type="submit" size="sm">Submit</Button>
+                        <Button type="button" size="sm" variant="outline" onClick={() => setReportingPostId(null)}>Cancel</Button>
+                      </div>
+                      {postReportError && <div className="text-xs text-red-600">{postReportError}</div>}
+                      {postReportSuccess && <div className="text-xs text-green-600">{postReportSuccess}</div>}
+                    </form>
+                  )}
+                  <CommentsSection postId={post.id} />
                 </CardContent>
               </Card>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
+        {showSupportChat && <SupportChatbot onClose={() => setShowSupportChat(false)} />}
       </div>
-
-      {/* Support Chatbot Modal */}
-      {showSupportChat && <SupportChatbot onClose={() => setShowSupportChat(false)} />}
     </div>
   )
 }

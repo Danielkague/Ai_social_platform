@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
+import AdminNavLink from "@/components/AdminNavLink";
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,7 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <nav className="w-full flex justify-end p-4 bg-gray-100 border-b">
+            <AdminNavLink />
+          </nav>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )
