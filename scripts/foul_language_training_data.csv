@@ -1,0 +1,35 @@
+text,category,sdg_relevance,notes
+"You are stupid",offensive,,General insult
+"I will kill you",threat,SDG 16,Direct threat of violence
+"All women are useless",hate_speech,SDG 5,Gender-based hate speech
+"Go die",threat,SDG 16,Incitement to self-harm or violence
+"You are a loser",offensive,,General insult
+"I hate all people from that group",hate_speech,SDG 16,Group-based hate
+"You should be raped",threat,SDG 5,Sexual violence threat
+"Shut up, idiot",harassment,,Harassment and insult
+"You are so fat and ugly",offensive,SDG 5,Body shaming
+"F*** you",profanity,,Profanity
+"Click here for free money",spam,,Spam/scam
+"You are a worthless piece of trash",offensive,,Extreme insult
+"Go back to your country",hate_speech,SDG 16,Xenophobic hate speech
+"I will find you and hurt you",threat,SDG 16,Threat of physical harm
+"Women should not have rights",hate_speech,SDG 5,Gender-based hate
+"You are a b****",profanity,SDG 5,Profanity and gendered insult
+"All [minority] are criminals",hate_speech,SDG 16,Racist hate speech
+"I hope you get cancer",threat,,Wishing harm
+"You are so dumb",offensive,,General insult
+"Send nudes or else",harassment,SDG 5,Sexual harassment
+"You are disgusting",offensive,,General insult
+"You are just a girl",hate_speech,SDG 5,Gender-based stereotype
+"No man will love you",offensive,SDG 5,Body/gender shaming
+"You are a slut",profanity,SDG 5,Gendered slur
+"Go make me a sandwich",hate_speech,SDG 5,Misogynistic phrase
+"All men are trash",hate_speech,SDG 5,Gender-based hate
+"You are a whore",profanity,SDG 5,Gendered slur
+"You are inferior because you are a woman",hate_speech,SDG 5,Gender-based hate
+"Refugees are criminals",hate_speech,SDG 16,Xenophobic hate
+"I love this community!",not_hate_speech,,Positive/neutral
+"You are awesome!",not_hate_speech,,Positive/neutral
+"Let's work together for peace",not_hate_speech,SDG 16,Positive/SDG 16
+"Women are strong and capable",not_hate_speech,SDG 5,Positive/SDG 5
+"Everyone deserves respect",not_hate_speech,,Positive/neutral 

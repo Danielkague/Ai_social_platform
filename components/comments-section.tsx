@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle, Shield } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
+import SupportChatbot from "@/app/components/support-chatbot";
 
 interface Comment {
   id: number
@@ -33,6 +34,7 @@ export default function CommentsSection({ postId }: { postId: number }) {
   const [reportError, setReportError] = useState("")
   const [reportSuccess, setReportSuccess] = useState("")
   const { user, profile } = useAuth()
+  const [showAppealChat, setShowAppealChat] = useState<{ open: boolean, comment?: Comment } | null>(null);
 
   useEffect(() => {
     fetchComments()
@@ -141,65 +143,89 @@ export default function CommentsSection({ postId }: { postId: number }) {
         {comments.length === 0 ? (
           <div className="text-gray-500 text-sm">No comments yet. Be the first to comment!</div>
         ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className="bg-white rounded-lg p-3 border">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                  {comment.profiles?.full_name?.[0]?.toUpperCase() || comment.profiles?.username?.[0]?.toUpperCase()}
-                </div>
-                <div>
-                  <span className="font-medium">{comment.profiles?.full_name || comment.profiles?.username}</span>
-                  <span className="text-xs text-gray-500 ml-2">{formatTimestamp(comment.timestamp)}</span>
-                </div>
-                {comment.moderation_status === "approved" && (
-                  <Badge variant="secondary" className="flex items-center gap-1 ml-2">
-                    <Shield className="w-3 h-3" /> Safe
-                  </Badge>
-                )}
-                {comment.moderation_status === "flagged" && (
-                  <Badge variant="destructive" className="flex items-center gap-1 ml-2">
-                    <AlertTriangle className="w-3 h-3" /> Flagged
-                  </Badge>
-                )}
-              </div>
-              <div className="text-gray-800 text-sm mb-1">{comment.content}</div>
-              {comment.moderation_status === "flagged" && (
-                <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
-                  {comment.categories && comment.categories.length > 0 && (
-                    <div>Detected: {comment.categories.join(", ")}</div>
-                  )}
-                  {comment.confidence && (
-                    <div>Confidence: {(comment.confidence * 100).toFixed(1)}%</div>
-                  )}
-                  {comment.severity && (
-                    <div>Severity: {comment.severity.charAt(0).toUpperCase() + comment.severity.slice(1)}</div>
-                  )}
-                </div>
-              )}
-              <div className="flex gap-2 mt-1">
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 text-red-600 hover:text-red-700" onClick={() => handleReport(comment.id)}>
-                  <AlertTriangle className="w-3 h-3" /> Report
-                </Button>
-              </div>
-              {reportingId === comment.id && (
-                <form onSubmit={submitReport} className="mt-2 flex flex-col gap-2 bg-red-50 p-2 rounded">
-                  <textarea
-                    value={reportReason}
-                    onChange={(e) => setReportReason(e.target.value)}
-                    placeholder="Describe the issue..."
-                    className="border rounded p-1 text-sm"
-                    required
-                  />
-                  <div className="flex gap-2">
-                    <Button type="submit" size="sm">Submit</Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => setReportingId(null)}>Cancel</Button>
+          comments.map((comment) => {
+            const isFlagged = comment.moderation_status === "flagged";
+            // Hide flagged comments for non-admins
+            if (isFlagged && !profile?.is_admin) {
+              // Show appeal button if the user is the author
+              const isAuthor = user && user.id === comment.user_id;
+              return (
+                <div key={comment.id} className="bg-gray-100 rounded-lg p-3 border border-red-200 text-red-700 text-sm italic opacity-80 flex flex-col gap-2">
+                  <div>
+                    This comment was flagged for hate speech or abuse and is hidden. <span className="font-semibold">(Flagged by AI Moderation)</span>
                   </div>
-                  {reportError && <div className="text-xs text-red-600">{reportError}</div>}
-                  {reportSuccess && <div className="text-xs text-green-600">{reportSuccess}</div>}
-                </form>
-              )}
-            </div>
-          ))
+                  {isAuthor && (
+                    <Button size="sm" variant="outline" className="w-fit" onClick={() => setShowAppealChat({ open: true, comment })}>
+                      Appeal Moderation
+                    </Button>
+                  )}
+                  {showAppealChat?.open && showAppealChat.comment?.id === comment.id && (
+                    <SupportChatbot onClose={() => setShowAppealChat(null)} />
+                  )}
+                </div>
+              );
+            }
+            return (
+              <div key={comment.id} className="bg-white rounded-lg p-3 border">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    {comment.profiles?.full_name?.[0]?.toUpperCase() || comment.profiles?.username?.[0]?.toUpperCase()}
+                  </div>
+                  <div>
+                    <span className="font-medium">{comment.profiles?.full_name || comment.profiles?.username}</span>
+                    <span className="text-xs text-gray-500 ml-2">{formatTimestamp(comment.timestamp)}</span>
+                  </div>
+                  {comment.moderation_status === "approved" && (
+                    <Badge variant="secondary" className="flex items-center gap-1 ml-2">
+                      <Shield className="w-3 h-3" /> Safe
+                    </Badge>
+                  )}
+                  {isFlagged && (
+                    <Badge variant="destructive" className="flex items-center gap-1 ml-2">
+                      <AlertTriangle className="w-3 h-3" /> Flagged
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-gray-800 text-sm mb-1">{comment.content}</div>
+                {isFlagged && (
+                  <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                    {comment.categories && comment.categories.length > 0 && (
+                      <div>Detected: {comment.categories.join(", ")}</div>
+                    )}
+                    {comment.confidence && (
+                      <div>Confidence: {(comment.confidence * 100).toFixed(1)}%</div>
+                    )}
+                    {comment.severity && (
+                      <div>Severity: {comment.severity.charAt(0).toUpperCase() + comment.severity.slice(1)}</div>
+                    )}
+                    <div className="font-semibold mt-1">Visible to admins only</div>
+                  </div>
+                )}
+                <div className="flex gap-2 mt-1">
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1 text-red-600 hover:text-red-700" onClick={() => handleReport(comment.id)}>
+                    <AlertTriangle className="w-3 h-3" /> Report
+                  </Button>
+                </div>
+                {reportingId === comment.id && (
+                  <form onSubmit={submitReport} className="mt-2 flex flex-col gap-2 bg-red-50 p-2 rounded">
+                    <textarea
+                      value={reportReason}
+                      onChange={(e) => setReportReason(e.target.value)}
+                      placeholder="Describe the issue..."
+                      className="border rounded p-1 text-sm"
+                      required
+                    />
+                    <div className="flex gap-2">
+                      <Button type="submit" size="sm">Submit</Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => setReportingId(null)}>Cancel</Button>
+                    </div>
+                    {reportError && <div className="text-xs text-red-600">{reportError}</div>}
+                    {reportSuccess && <div className="text-xs text-green-600">{reportSuccess}</div>}
+                  </form>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </div>

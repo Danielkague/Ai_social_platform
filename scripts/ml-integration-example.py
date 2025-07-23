@@ -19,6 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+import traceback
 
 app = Flask(__name__)
 
@@ -62,39 +63,60 @@ class AdvancedHateSpeechDetector:
         }
 
     def _load_abuse_patterns(self):
-        """Load comprehensive abuse detection patterns"""
+        """Load comprehensive abuse detection patterns, expanded for SDG 5 (gender) and SDG 16 (violence/xenophobia)"""
         patterns = {
             'threat': [
                 r'\b(kill|murder|death|die|hurt|harm|attack|destroy)\b.*\b(you|them|him|her)\b',
                 r'\b(going to|gonna|will)\b.*\b(kill|hurt|harm|destroy)\b',
                 r'\bwish.*\b(dead|death|die)\b',
-                r'\b(shoot|stab|beat|punch)\b.*\b(you|them)\b'
+                r'\b(shoot|stab|beat|punch)\b.*\b(you|them)\b',
+                # SDG 16: Incitement/violence against groups
+                r'\b(kill|attack|destroy|eliminate)\b.*\b(all|every|these|those)\b.*\b(people|group|race|religion|immigrants|refugees)\b',
+                r'\b(ethnic cleansing|final solution)\b',
             ],
             'hate_speech': [
                 r'\b(hate|despise|loathe)\b.*\b(because|for being|all)\b',
                 r'\b(all|every)\b.*\b(are|should be)\b.*\b(killed|removed|eliminated)\b',
                 r'\b(inferior|subhuman|worthless)\b.*\b(race|people|group)\b',
-                r'\b(genocide|ethnic cleansing|final solution)\b'
+                r'\b(genocide|ethnic cleansing|final solution)\b',
+                # SDG 5: Gender-based hate
+                r'\b(women|girls|females)\b.*\b(should|must|deserve|are|be)\b.*\b(killed|raped|hurt|inferior|worthless|slaves?)\b',
+                r'\b(you are just a girl)\b',
+                r'\b(women should not have rights)\b',
+                # SDG 16: Xenophobia/racism
+                r'\b(go back to your country)\b',
+                r'\b([a-z]+s? are criminals)\b',
             ],
             'harassment': [
                 r'\b(stalking|following|watching)\b.*\byou\b',
                 r'\b(doxx|dox|expose|find)\b.*\b(address|location|info)\b',
                 r'\bshut up\b.*\b(stupid|idiot|moron)\b',
-                r'\b(constantly|always|keep)\b.*\b(bothering|annoying|messaging)\b'
+                r'\b(constantly|always|keep)\b.*\b(bothering|annoying|messaging)\b',
+                # SDG 5: Sexual harassment
+                r'\bsend nudes\b',
+                r'\b(sexual (harassment|abuse|assault))\b',
+                r'\b(rape|raped|rapist)\b',
+                r'\b(you should be raped)\b',
             ],
             'offensive': [
                 r'\b(stupid|idiot|moron|dumb|retard|mental)\b',
                 r'\b(ugly|fat|gross|disgusting)\b.*\b(you|face|body)\b',
                 r'\b(loser|failure|pathetic|worthless)\b',
-                r'\b(shut up|go away|get lost)\b'
+                r'\b(shut up|go away|get lost)\b',
+                # SDG 5: Body shaming
+                r'\b(so fat|so ugly|no man will love you|too ugly for love)\b',
             ],
             'profanity': [
+                r'\bbitch\b',
+                r'\bslut\b',
+                r'\bwhore\b',
+                r'\bcunt\b',
                 r'\bf[u*][c*]k\b',
                 r'\bs[h*][i*]t\b',
                 r'\bb[i*]tch\b',
                 r'\ba[s*][s*]hole\b',
                 r'\bd[a*]mn\b',
-                r'\bc[r*]ap\b'
+                r'\bc[r*]ap\b',
             ],
             'spam': [
                 r'\b(buy now|click here|limited time|act now)\b',
@@ -102,13 +124,11 @@ class AdvancedHateSpeechDetector:
                 r'\b(winner|congratulations|selected)\b.*\b(prize|lottery|money)\b'
             ]
         }
-
         # Compile regex patterns for efficiency
         compiled_patterns = {}
         for category, pattern_list in patterns.items():
             compiled_patterns[category] = [re.compile(pattern, re.IGNORECASE)
                                            for pattern in pattern_list]
-
         return compiled_patterns
 
     def _preprocess_text(self, text):
@@ -309,10 +329,11 @@ model_path = 'hate_speech_model.pkl'
 detector.load_model(model_path)
 
 # Database setup for training data and abuse reports
+DB_PATH = 'training_data.db'
 
 
 def init_db():
-    conn = sqlite3.connect('training_data.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     # Training data table
@@ -385,6 +406,19 @@ def health_check():
     })
 
 
+def convert_types(obj):
+    import numpy as np
+    if isinstance(obj, dict):
+        return {k: convert_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_types(v) for v in obj]
+    elif isinstance(obj, (np.generic,)):
+        return obj.item()
+    elif isinstance(obj, (bool, int, float, str, type(None))):
+        return obj
+    return str(obj)
+
+
 @app.route('/predict-hate-speech', methods=['POST'])
 def predict_hate_speech():
     """
@@ -404,10 +438,13 @@ def predict_hate_speech():
         with model_lock:
             prediction = detector.predict(text)
 
+        # Convert all values to standard types
+        prediction = convert_types(prediction)
+
         # If requires immediate action, automatically create abuse report
         if prediction['requires_immediate_action']:
             try:
-                conn = sqlite3.connect('training_data.db')
+                conn = sqlite3.connect(DB_PATH)
                 cursor = conn.cursor()
 
                 cursor.execute('''
@@ -418,7 +455,7 @@ def predict_hate_speech():
                     user_id,
                     json.dumps(prediction),
                     prediction['severity'],
-                    prediction['requires_immediate_action']
+                    int(prediction['requires_immediate_action'])
                 ))
 
                 conn.commit()
@@ -436,7 +473,8 @@ def predict_hate_speech():
 
     except Exception as e:
         logger.error(f"Prediction error: {e}")
-        return jsonify({'error': 'Prediction failed'}), 500
+        traceback.print_exc()
+        return jsonify({'error': 'Prediction failed', 'details': str(e)}), 500
 
 
 @app.route('/report-abuse', methods=['POST'])
@@ -465,7 +503,7 @@ def report_abuse():
             prediction = detector.predict(text)
 
         # Store abuse report
-        conn = sqlite3.connect('training_data.db')
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute('''
@@ -513,7 +551,7 @@ def store_training_data():
     try:
         data = request.get_json()
 
-        conn = sqlite3.connect('training_data.db')
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute('''
@@ -544,7 +582,7 @@ def retrain_model():
     """
     try:
         # Fetch training data from database
-        conn = sqlite3.connect('training_data.db')
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute('''
@@ -571,7 +609,7 @@ def retrain_model():
             detector.save_model(model_path)
 
             # Store training metrics
-            conn = sqlite3.connect('training_data.db')
+            conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
 
             cursor.execute('''
@@ -606,7 +644,7 @@ def retrain_model():
 def get_model_stats():
     """Get comprehensive model and system statistics"""
     try:
-        conn = sqlite3.connect('training_data.db')
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         # Get training data stats
@@ -689,7 +727,7 @@ def get_model_stats():
 def get_pending_reports():
     """Get pending abuse reports for moderation"""
     try:
-        conn = sqlite3.connect('training_data.db')
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute('''

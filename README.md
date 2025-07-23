@@ -7,8 +7,9 @@ A modern social media platform built with Next.js, React, and Supabase, featurin
 - User registration and login (Supabase Auth)
 - User profiles
 - Posting and commenting
-- AI-powered hate speech and abuse detection (Python ML server integration)
+- **AI-powered hate speech and abuse detection (Python ML server integration, fully operational)**
 - Like and report functionality for posts and comments
+- **Automatic reporting of flagged content to admins**
 - Admin dashboard for viewing and moderating reports
 - Ban users and delete abusive comments
 - Real-time updates (optional)
@@ -17,7 +18,7 @@ A modern social media platform built with Next.js, React, and Supabase, featurin
 
 - **Frontend:** Next.js (React), Tailwind CSS
 - **Backend:** Supabase (Postgres, Auth, Realtime)
-- **AI Moderation:** Python ML server (integrated via API)
+- **AI Moderation:** Python ML server (integrated via API, hardcoded URL for reliability)
 
 ---
 
@@ -55,13 +56,14 @@ npm run dev
 
 Visit [http://localhost:3000](http://localhost:3000) to view the app.
 
-### 5. (Optional) Start the AI Moderation Server
+### 5. Start the AI Moderation Server
 
-- See `scripts/ml-integration-example.py` for a sample Python ML server.
-- Update your `.env.local` with the ML server URL if needed:
-  ```env
-  ML_SERVER_URL=http://localhost:5000
+- Run the ML server:
+  ```bash
+  python scripts/ml-integration-example.py
   ```
+- The ML server URL is hardcoded as `http://localhost:5000` in the API routes for reliability.
+- **requirements.txt is up to date.**
 
 ---
 
@@ -73,19 +75,30 @@ Visit [http://localhost:3000](http://localhost:3000) to view the app.
 
 ---
 
-## Admin Dashboard
+## Admin Dashboard & Moderation Flow
 
-- Log in as an admin user (with `is_admin = true` in `profiles`).
-- Click the **Admin Dashboard** link in the navigation bar.
-- View all reported comments, see who reported and why.
-- **Delete** abusive comments or **ban** users directly from the dashboard.
+- All posts and comments are analyzed by the AI model for hate speech, abuse, and other forms of bad language.
+- If content is flagged by the AI, it is **auto-reported** to the `reports` table with the reason "Auto-flagged by AI moderation".
+- Flagged content is hidden from regular users and visible only to admins/moderators.
+- Admins can review, approve, or remove flagged content and ban users if necessary.
+- Users are notified if their comment is flagged and can appeal the decision via the support chatbot.
 
 ---
 
-## Moderation & Banning
+## Troubleshooting ML Server Integration
 
-- When a comment is reported, its content is copied into the report for permanent record.
-- Banned users (`banned = true` in `profiles`) cannot log in or post.
+- If moderation is not working, ensure the ML server is running on `http://localhost:5000`.
+- The ML server URL is hardcoded in `app/api/posts/route.ts` and `app/api/comments/route.ts` for reliability.
+- Check the ML server logs for errors. If you see `Object of type bool is not JSON serializable`, ensure you are running the latest code with the type conversion fix.
+- Use `/health` and `/model-stats` endpoints to verify the ML server is up.
+
+---
+
+## Deployment
+
+- The project is ready for deployment to Render or similar platforms.
+- Ensure both the Next.js frontend and the ML server are deployed and accessible.
+- Update the ML server URL in the code if deploying to a different host.
 
 ---
 

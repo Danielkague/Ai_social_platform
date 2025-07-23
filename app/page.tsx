@@ -156,9 +156,12 @@ function SocialMediaPlatform() {
               <p className="text-xs text-blue-700">Member since {profile?.join_date ? new Date(profile.join_date).toLocaleDateString() : "today"}.</p>
             </div>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-            <LogOut className="w-4 h-4" /> Logout
-          </Button>
+          <div className="flex gap-2 items-center">
+            <a href="/README.md#moderation--ai-policy" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline text-sm hover:text-blue-900">Moderation & AI Policy</a>
+            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+              <LogOut className="w-4 h-4" /> Logout
+            </Button>
+          </div>
         </header>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-2"></div>

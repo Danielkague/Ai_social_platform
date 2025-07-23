@@ -13,7 +13,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const getSession = async () => {
-      setIsLoading(true)
       const { data: { session } } = await supabase.auth.getSession()
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -25,13 +24,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession()
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null)
+      setIsLoading(false)
       if (session?.user) {
         const profileData = await getProfile(session.user.id)
         setProfile(profileData)
       } else {
         setProfile(null)
       }
-      setIsLoading(false)
     })
     return () => { listener?.subscription.unsubscribe() }
   }, [])

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { supabase } from "@/lib/supabaseClient"
 
+const ML_SERVER_URL = "http://localhost:5000";
 // Helper: Call ML server for moderation
 async function moderateContent(content: string) {
-  const res = await fetch(process.env.ML_SERVER_URL + "/predict-hate-speech", {
+  const res = await fetch(ML_SERVER_URL + "/predict-hate-speech", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text: content })
@@ -34,10 +35,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing postId, userId, or content" }, { status: 400 })
     }
 
+    console.log('ML_SERVER_URL:', ML_SERVER_URL)
     // ML moderation
     let moderationResult = null
     try {
       moderationResult = await moderateContent(content)
+      console.log('Moderation result:', moderationResult)
     } catch (e) {
       moderationResult = {
         is_hate_speech: false,
@@ -46,6 +49,7 @@ export async function POST(request: NextRequest) {
         severity: null,
         moderation_status: "pending"
       }
+      console.error('ML moderation failed:', e)
     }
 
     // Insert comment into Supabase
@@ -63,6 +67,20 @@ export async function POST(request: NextRequest) {
       }
     ]).select().single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Auto-reporting: create a report if flagged
+    if (moderationResult.is_hate_speech && data?.id) {
+      await supabase.from("reports").insert([
+        {
+          reporter_id: userId, // or a system/admin user id if you prefer
+          reported_user_id: userId,
+          comment_id: data.id,
+          reason: "Auto-flagged by AI moderation",
+          status: "pending",
+          comment_content: content
+        }
+      ])
+    }
     return NextResponse.json(data)
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to create comment" }, { status: 500 })
