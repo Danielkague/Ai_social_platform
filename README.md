@@ -112,4 +112,9 @@ Visit [http://localhost:3000](http://localhost:3000) to view the app.
 
 ## License
 
+
+### Pitch deck
+https://safevoices-ai-for-gender-010570v.gamma.site/ 
+
+
 MIT
