@@ -1,0 +1,30 @@
+# Use Node.js base image
+FROM node:18-alpine
+
+# Install Python and pip
+RUN apk add --no-cache python3 py3-pip
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY requirements.txt ./
+
+# Install Node.js dependencies
+RUN npm install --legacy-peer-deps
+
+# Install Python dependencies
+RUN python3 -m pip install -r requirements.txt
+
+# Copy source code
+COPY . .
+
+# Build the Next.js app
+RUN npm run build
+
+# Expose ports for all services
+EXPOSE 3000 5000 5001
+
+# Start command (Railway will override this)
+CMD ["npm", "start"] 

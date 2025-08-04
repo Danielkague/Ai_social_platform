@@ -25,7 +25,7 @@ healthcheckTimeout = 100
 [[services]]
 name = "ml-server"
 sourceDir = "scripts"
-buildCommand = "pip install -r ../requirements.txt"
+buildCommand = "python -m pip install -r ../requirements.txt"
 startCommand = "python ml-integration-example.py"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
@@ -34,7 +34,7 @@ healthcheckTimeout = 100
 [[services]]
 name = "hope-ai"
 sourceDir = "scripts"
-buildCommand = "pip install -r ../requirements.txt"
+buildCommand = "python -m pip install -r ../requirements.txt"
 startCommand = "python Hope.py"
 healthcheckPath = "/health"
 healthcheckTimeout = 100 
