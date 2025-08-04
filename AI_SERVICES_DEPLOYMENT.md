@@ -17,7 +17,7 @@ Since Railway might only automatically deploy the frontend, you need to manually
    - Set **Root Directory** to: `scripts`
 
 3. **Configure Build Settings**
-   - **Build Command**: `python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r ../requirements-simple.txt`
+   - **Build Command**: `python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r requirements.txt`
    - **Start Command**: `/app/venv/bin/python ml-integration-example.py`
    - **Health Check Path**: `/health`
 
@@ -35,7 +35,7 @@ Since Railway might only automatically deploy the frontend, you need to manually
    - Set **Root Directory** to: `scripts`
 
 2. **Configure Build Settings**
-   - **Build Command**: `python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r ../requirements-simple.txt`
+   - **Build Command**: `python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r requirements.txt`
    - **Start Command**: `/app/venv/bin/python Hope.py`
    - **Health Check Path**: `/health`
 
