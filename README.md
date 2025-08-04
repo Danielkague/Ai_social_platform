@@ -146,10 +146,10 @@ npm run dev
 ### **Configuration Files**
 
 The project includes comprehensive Railway configuration:
-
 - `railway.toml` - Main Railway configuration for all services
-- `railway.json` - Alternative configuration
+- `railway.json` - Alternative configuration with service definitions
 - `nixpacks.toml` - Modern Nixpacks configuration
+- `Procfile` - Process definitions for all services
 - `RAILWAY_DEPLOYMENT.md` - Backup manual deployment guide
 
 ### **Detailed Instructions**
