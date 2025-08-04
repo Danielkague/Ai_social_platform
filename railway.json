@@ -13,31 +13,5 @@
   "variables": {
     "NPM_CONFIG_PACKAGE_MANAGER": "npm",
     "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
-  },
-  "services": [
-    {
-      "name": "frontend",
-      "sourceDir": ".",
-      "buildCommand": "npm install --legacy-peer-deps && npm run build",
-      "startCommand": "npm start",
-      "healthcheckPath": "/",
-      "healthcheckTimeout": 100
-    },
-    {
-      "name": "ml-server",
-      "sourceDir": "scripts",
-      "buildCommand": "pip install -r ../requirements.txt",
-      "startCommand": "python ml-integration-example.py",
-      "healthcheckPath": "/health",
-      "healthcheckTimeout": 100
-    },
-    {
-      "name": "hope-ai",
-      "sourceDir": "scripts",
-      "buildCommand": "pip install -r ../requirements.txt",
-      "startCommand": "python Hope.py",
-      "healthcheckPath": "/health",
-      "healthcheckTimeout": 100
-    }
-  ]
+  }
 } 
