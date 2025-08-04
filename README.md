@@ -87,8 +87,8 @@ Create a `.env.local` file in the project root:
 
 ```env
 # Supabase Configuration (Required)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_URL=https://iwemxnniterxwqzdrqka.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3ZW14bm5pdGVyeHdxemRycWthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0NzgwMDAsImV4cCI6MjA2ODA1NDAwMH0.xa50m2oeq7efKQH-HBcf-aQSb6En5ueN-a1M1hS42_0
 
 # AI Services URLs (for Railway deployment)
 NEXT_PUBLIC_ML_SERVICE_URL=http://localhost:5000
@@ -96,6 +96,15 @@ NEXT_PUBLIC_HOPE_AI_URL=http://localhost:5001
 ```
 
 **Note:** For Railway deployment, you'll need to set these environment variables in your Railway project settings.
+
+### **Railway Environment Variables**
+
+In your Railway project dashboard, add these environment variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://iwemxnniterxwqzdrqka.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3ZW14bm5pdGVyeHdxemRycWthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0NzgwMDAsImV4cCI6MjA2ODA1NDAwMH0.xa50m2oeq7efKQH-HBcf-aQSb6En5ueN-a1M1hS42_0
+```
 
 ### **4. Database Setup**
 
