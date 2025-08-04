@@ -79,7 +79,10 @@ def test_custom_chatbot():
                         if line.startswith('data: ') and not line.startswith('data: [DONE]'):
                             try:
                                 data = json.loads(line[6:])  # Remove 'data: ' prefix
-                                if 'text' in data:
+                                if 'content' in data:
+                                    response_text = data['content']
+                                    break
+                                elif 'text' in data:
                                     response_text += data['text']
                             except:
                                 pass

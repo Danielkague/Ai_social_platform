@@ -195,27 +195,20 @@ export async function POST(req: NextRequest) {
     // Generate response
     const response = generateResponse(lastMessage.content, userId)
     
-    // Create streaming response
+    // Create streaming response compatible with useChat
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
       start(controller) {
-        // Send response in chunks to simulate streaming
-        const chunks = response.split(' ')
-        let index = 0
-        
-        const sendChunk = () => {
-          if (index < chunks.length) {
-            const chunk = chunks[index] + (index < chunks.length - 1 ? ' ' : '')
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`))
-            index++
-            setTimeout(sendChunk, 50) // 50ms delay between words
-          } else {
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-            controller.close()
-          }
+        // Send the full response as a single chunk for useChat compatibility
+        const responseData = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: response
         }
         
-        sendChunk()
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(responseData)}\n\n`))
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+        controller.close()
       }
     })
     
