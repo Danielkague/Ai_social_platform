@@ -5,24 +5,28 @@ A revolutionary social media platform built with Next.js, React, and Supabase, f
 ## 🌟 **Key Features**
 
 ### 🤖 **AI-Powered Safety Systems**
+
 - **Advanced Hate Speech Detection** - Real-time content analysis using machine learning
 - **Psychological Support AI** - 24/7 mental health companion with crisis intervention
 - **Automatic Content Moderation** - Instant flagging and reporting of harmful content
 - **Pattern-Based Detection** - Enhanced accuracy with regex patterns and ML models
 
 ### 💙 **Mental Health & Support**
+
 - **Hope AI Chatbot** - Empathetic psychological support and counseling
 - **Crisis Intervention** - Immediate access to suicide prevention and emergency resources
 - **Professional Referrals** - Direct connections to licensed therapists and support groups
 - **Trauma-Informed Care** - AI trained for abuse, harassment, and mental health support
 
 ### 🛡️ **Content Safety**
+
 - **Real-time Moderation** - Posts and comments analyzed instantly
 - **Auto-Reporting System** - Flagged content automatically sent to admins
 - **User Protection** - Harmful content hidden from regular users
 - **Admin Dashboard** - Comprehensive moderation tools and user management
 
 ### 👥 **Social Features**
+
 - **User Authentication** - Secure registration and login with Supabase
 - **Social Feed** - Post creation, commenting, and interaction
 - **Like System** - User engagement and content appreciation
@@ -31,6 +35,7 @@ A revolutionary social media platform built with Next.js, React, and Supabase, f
 ## 🚀 **Tech Stack**
 
 ### **Frontend**
+
 - **Next.js 15** - React framework with App Router
 - **React 19** - Latest React with modern features
 - **Tailwind CSS** - Utility-first CSS framework
@@ -38,11 +43,13 @@ A revolutionary social media platform built with Next.js, React, and Supabase, f
 - **Lucide React** - Beautiful icon library
 
 ### **Backend & Database**
+
 - **Supabase** - PostgreSQL database with real-time features
 - **Supabase Auth** - Secure authentication system
 - **Row Level Security** - Database-level security policies
 
 ### **AI & Machine Learning**
+
 - **Python Flask** - ML server for content moderation
 - **Scikit-learn** - Machine learning models for hate speech detection
 - **Custom AI Models** - Trained on comprehensive datasets
@@ -51,12 +58,14 @@ A revolutionary social media platform built with Next.js, React, and Supabase, f
 ## 📦 **Installation & Setup**
 
 ### **1. Clone the Repository**
+
 ```bash
 git clone https://github.com/your-username/hope-social-media.git
 cd hope-social-media
 ```
 
 ### **2. Install Dependencies**
+
 ```bash
 # Install Node.js dependencies
 npm install --legacy-peer-deps
@@ -73,13 +82,16 @@ pip install flask flask-cors numpy scikit-learn pandas
 ```
 
 ### **3. Environment Configuration**
+
 Create a `.env.local` file in the project root:
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 ### **4. Database Setup**
+
 1. Create a Supabase project at [supabase.com](https://supabase.com)
 2. Run the SQL schema from `supabase_schema.sql` in your Supabase SQL Editor
 3. Add an admin user: `UPDATE profiles SET is_admin = true WHERE email = 'your-email@example.com';`
@@ -87,6 +99,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ### **5. Start All Services**
 
 #### **Start AI Servers (Terminal 1)**
+
 ```bash
 # Activate virtual environment
 & "c:/path/to/project/.venv/Scripts/Activate.ps1"
@@ -99,11 +112,13 @@ python scripts/Hope.py
 ```
 
 #### **Start Frontend (Terminal 2)**
+
 ```bash
 npm run dev
 ```
 
 ### **6. Access the Application**
+
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
 - **ML Server**: [http://localhost:5000](http://localhost:5000)
 - **Hope AI**: [http://localhost:5001](http://localhost:5001)
@@ -111,6 +126,7 @@ npm run dev
 ## 🚀 **Deployment on Railway**
 
 ### **Quick Deploy**
+
 1. **Sign up** at [railway.app](https://railway.app)
 2. **Connect GitHub** repository
 3. **Create 3 services** (Frontend, ML Server, Hope AI)
@@ -118,11 +134,13 @@ npm run dev
 5. **Deploy automatically**
 
 ### **Detailed Instructions**
+
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for comprehensive Railway deployment guide.
 
 ## 🎯 **Core Features Deep Dive**
 
 ### **🤖 AI Content Moderation**
+
 The platform uses a sophisticated two-tier approach:
 
 1. **Pattern-Based Detection**: Regex patterns for immediate identification of hate speech, slurs, and harmful content
@@ -133,6 +151,7 @@ The platform uses a sophisticated two-tier approach:
    - Xenophobic and discriminatory content
 
 **Features:**
+
 - Real-time content analysis
 - Confidence scoring (0-1 scale)
 - Severity assessment (low, medium, high, critical)
@@ -140,34 +159,41 @@ The platform uses a sophisticated two-tier approach:
 - Immediate content flagging and admin notification
 
 ### **💙 Hope AI - Psychological Support**
+
 A comprehensive mental health support system:
 
 **Crisis Intervention:**
+
 - Suicide prevention protocols
 - Domestic abuse support
 - Emergency contact information
 - Safety planning resources
 
 **Mental Health Support:**
+
 - Depression and anxiety guidance
 - Grief and loss counseling
 - Relationship stress management
 - Professional therapy referrals
 
 **Resource Database:**
+
 - Licensed therapists directory
 - Support group connections
 - Crisis hotlines (988, Crisis Text Line)
 - Online therapy platforms (BetterHelp, Talkspace)
 
 ### **🛡️ Safety & Moderation**
+
 **Content Protection:**
+
 - Automatic flagging of harmful content
 - Hidden flagged content from regular users
 - Admin review and moderation tools
 - User appeal system via support chatbot
 
 **User Safety:**
+
 - Anonymous reporting system
 - Admin dashboard for content review
 - User banning capabilities
@@ -176,18 +202,21 @@ A comprehensive mental health support system:
 ## 🔧 **API Endpoints**
 
 ### **ML Integration Server (Port 5000)**
+
 - `POST /predict-hate-speech` - Content analysis
 - `POST /report-abuse` - Manual abuse reporting
 - `GET /model-stats` - Model performance metrics
 - `GET /health` - Server health check
 
 ### **Hope AI Server (Port 5001)**
+
 - `POST /counsel` - Psychological support
 - `POST /train-hope` - AI training endpoint
 - `GET /hope-stats` - Support statistics
 - `GET /health` - Server health check
 
 ### **Frontend API Routes**
+
 - `POST /api/posts` - Create posts with AI moderation
 - `POST /api/comments` - Create comments with AI moderation
 - `POST /api/support-chat` - Hope AI integration
@@ -196,12 +225,14 @@ A comprehensive mental health support system:
 ## 🎨 **User Experience**
 
 ### **Landing Page**
+
 - Beautiful gradient design
 - Login/registration forms
 - Feature highlights and safety information
 - Professional branding with Hope Social Media theme
 
 ### **Social Feed**
+
 - Clean, modern interface
 - Post creation with real-time moderation
 - Like and comment functionality
@@ -209,12 +240,14 @@ A comprehensive mental health support system:
 - Support chatbot access
 
 ### **Admin Dashboard**
+
 - Comprehensive moderation tools
 - Report management interface
 - User management capabilities
 - Content review and approval system
 
 ### **Support System**
+
 - Floating support button
 - Modal-based chatbot interface
 - Resource library access
@@ -223,18 +256,21 @@ A comprehensive mental health support system:
 ## 🔒 **Security Features**
 
 ### **Authentication**
+
 - Supabase Auth integration
 - Secure session management
 - Protected routes
 - Role-based access control
 
 ### **Content Safety**
+
 - AI-powered content filtering
 - Automatic harmful content detection
 - Admin oversight and moderation
 - User reporting system
 
 ### **Data Protection**
+
 - Row Level Security (RLS)
 - Encrypted data transmission
 - Secure API endpoints
@@ -243,18 +279,21 @@ A comprehensive mental health support system:
 ## 🚀 **Performance Optimizations**
 
 ### **Frontend**
+
 - Next.js App Router for optimal routing
 - React 19 with latest performance features
 - Optimized component rendering
 - Efficient state management
 
 ### **AI Systems**
+
 - Fast pattern-based detection
 - Optimized ML model loading
 - Efficient API communication
 - Real-time response processing
 
 ### **Database**
+
 - Optimized Supabase queries
 - Efficient data relationships
 - Real-time subscriptions
@@ -265,6 +304,7 @@ A comprehensive mental health support system:
 ### **Common Issues**
 
 **AI Servers Not Starting:**
+
 ```bash
 # Check Python dependencies
 pip install flask flask-cors numpy scikit-learn pandas
@@ -274,6 +314,7 @@ pip install flask flask-cors numpy scikit-learn pandas
 ```
 
 **Frontend Styling Issues:**
+
 ```bash
 # Clear Next.js cache
 Remove-Item -Recurse -Force .next
@@ -283,11 +324,13 @@ npm install --legacy-peer-deps
 ```
 
 **Authentication Problems:**
+
 - Verify Supabase environment variables
 - Check database schema installation
 - Ensure RLS policies are configured
 
 ### **Health Checks**
+
 ```bash
 # Test ML Server
 curl http://localhost:5000/health
@@ -302,6 +345,7 @@ curl http://localhost:3000
 ## 📈 **Future Enhancements**
 
 ### **Planned Features**
+
 - **Real-time Notifications** - Push notifications for interactions
 - **Advanced Analytics** - User engagement and safety metrics
 - **Mobile App** - React Native mobile application
@@ -309,6 +353,7 @@ curl http://localhost:3000
 - **Community Features** - Groups, events, and communities
 
 ### **AI Improvements**
+
 - **Multi-language Support** - Content moderation in multiple languages
 - **Context Awareness** - Better understanding of content context
 - **Learning System** - AI that improves from user feedback
@@ -317,6 +362,7 @@ curl http://localhost:3000
 ## 🤝 **Contributing**
 
 We welcome contributions! Please see our contributing guidelines for:
+
 - Code standards and practices
 - Testing requirements
 - Documentation updates
