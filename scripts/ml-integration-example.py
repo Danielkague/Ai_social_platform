@@ -86,8 +86,16 @@ class AdvancedHateSpeechDetector:
                 r'\b(women|girls|females)\b.*\b(should|must|deserve|are|be)\b.*\b(killed|raped|hurt|inferior|worthless|slaves?)\b',
                 r'\b(you are just a girl)\b',
                 r'\b(women should not have rights)\b',
-                # SDG 16: Xenophobia/racism
+                # SDG 16: Xenophobia/racism - Enhanced patterns
                 r'\b(go back to your country)\b',
+                r'\b(go back where you came from)\b',
+                r'\b(you don\'t belong here)\b',
+                r'\b(you don\'t belong)\b',
+                r'\b(don\'t belong)\b',
+                r'\b(all immigrants are criminals)\b',
+                r'\b(refugees are terrorists)\b',
+                r'\b(go back to your own country)\b',
+                r'\b(you don\'t belong in this country)\b',
                 r'\b([a-z]+s? are criminals)\b',
                 # Enhanced single word detection for hate speech
                 r'\b(fuck|shit|bitch|cunt|dick|pussy|asshole|bastard|whore|slut|faggot)\b',
@@ -184,7 +192,9 @@ class AdvancedHateSpeechDetector:
             if category_matches > 0:
                 detected_categories.append(category)
                 # Calculate confidence based on pattern matches
-                confidence = min(category_matches / len(patterns), 1.0)
+                # Use a higher base confidence for any pattern match
+                base_confidence = 0.8 if category_matches > 0 else 0.0
+                confidence = min(base_confidence + (category_matches / len(patterns)) * 0.2, 1.0)
                 confidence_scores.append(
                     confidence * self.severity_weights.get(category, 0.5))
 
@@ -224,7 +234,11 @@ class AdvancedHateSpeechDetector:
         combined_confidence = max(max_pattern_confidence, ml_confidence)
 
         # Determine if it's hate speech
-        is_hate_speech = combined_confidence > 0.5
+        # Lower threshold for pattern-based detection, higher for ML-based
+        is_hate_speech = (
+            max_pattern_confidence > 0.1 or  # Pattern-based threshold
+            ml_confidence > 0.5              # ML-based threshold
+        )
 
         # Determine severity and immediate action requirement
         severity = self._calculate_severity(
