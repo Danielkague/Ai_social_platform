@@ -73,6 +73,9 @@ class AdvancedHateSpeechDetector:
                 # SDG 16: Incitement/violence against groups
                 r'\b(kill|attack|destroy|eliminate)\b.*\b(all|every|these|those)\b.*\b(people|group|race|religion|immigrants|refugees)\b',
                 r'\b(ethnic cleansing|final solution)\b',
+                # Enhanced single word detection
+                r'\b(kill|murder|death|die|hurt|harm|attack|destroy)\b',
+                r'\b(shoot|stab|beat|punch|hit|slap)\b',
             ],
             'hate_speech': [
                 r'\b(hate|despise|loathe)\b.*\b(because|for being|all)\b',
@@ -86,6 +89,10 @@ class AdvancedHateSpeechDetector:
                 # SDG 16: Xenophobia/racism
                 r'\b(go back to your country)\b',
                 r'\b([a-z]+s? are criminals)\b',
+                # Enhanced single word detection for hate speech
+                r'\b(fuck|shit|bitch|cunt|dick|pussy|asshole|bastard|whore|slut|faggot)\b',
+                r'\b(nigger|nigga|kike|spic|chink|gook|wetback|towelhead|raghead)\b',
+                r'\b(hate|despise|loathe|inferior|subhuman|worthless)\b',
             ],
             'harassment': [
                 r'\b(stalking|following|watching)\b.*\byou\b',
@@ -97,6 +104,9 @@ class AdvancedHateSpeechDetector:
                 r'\b(sexual (harassment|abuse|assault))\b',
                 r'\b(rape|raped|rapist)\b',
                 r'\b(you should be raped)\b',
+                # Enhanced single word detection for harassment
+                r'\b(stupid|idiot|moron|dumb|retard|imbecile)\b',
+                r'\b(rape|raped|rapist|harassment|stalking)\b',
             ],
             'offensive': [
                 r'\b(stupid|idiot|moron|dumb|retard|mental)\b',
