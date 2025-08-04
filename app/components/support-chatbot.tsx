@@ -22,7 +22,7 @@ export default function SupportChatbot({ onClose }: SupportChatbotProps) {
       {
         id: "1",
         role: "assistant",
-        content: "Hi! I'm here to provide psychological support and help you through any difficult experiences you've had on our platform. Whether you've experienced abuse, harassment, hate speech, or just need someone to talk to, I'm here to listen and connect you with professional help. How can I support you today?",
+        content: "Hi there! I'm Hope, your AI support companion. 💙 I'm here to listen, support, and help you through whatever you're going through. Whether you've experienced abuse, harassment, hate speech, or just need someone to talk to, I'm here for you. I care about your wellbeing and want to help you feel heard and supported. What's on your mind today?",
       },
     ],
   })
@@ -68,7 +68,7 @@ export default function SupportChatbot({ onClose }: SupportChatbotProps) {
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-pink-600" />
-            Mental Health & Safety Support
+            Hope - Your AI Support Companion
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button 
@@ -181,7 +181,7 @@ export default function SupportChatbot({ onClose }: SupportChatbotProps) {
                     <div className="flex items-center gap-2 mb-1">
                       <Heart className="w-4 h-4 text-pink-600" />
                       <Badge variant="secondary" className="text-xs">
-                        Mental Health Support
+                        Hope 💙
                       </Badge>
                     </div>
                   )}
@@ -194,7 +194,7 @@ export default function SupportChatbot({ onClose }: SupportChatbotProps) {
                 <div className="bg-gray-100 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-600"></div>
-                    <span className="text-sm text-gray-600">Thinking of the best way to support you...</span>
+                    <span className="text-sm text-gray-600">Hope is thinking of you...</span>
                   </div>
                 </div>
               </div>
@@ -206,7 +206,7 @@ export default function SupportChatbot({ onClose }: SupportChatbotProps) {
             <Input
               value={input}
               onChange={handleInputChange}
-              placeholder="Share what you're going through or ask for help..."
+              placeholder="Share what's on your mind... I'm here to listen 💙"
               className="flex-1"
             />
             <Button type="submit" disabled={isLoading || !input.trim()}>
