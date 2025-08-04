@@ -105,6 +105,10 @@ pids
 # Yarn Integrity file
 .yarn-integrity
 
+# pnpm
+pnpm-lock.yaml
+.pnpm-store/
+
 # parcel-bundler cache (https://parceljs.org/)
 .parcel-cache
 
