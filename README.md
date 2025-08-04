@@ -147,6 +147,7 @@ See [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for step-by-step instructio
 ### **Configuration Files**
 
 The project includes:
+
 - `railway.json` - Railway configuration for frontend
 - `RAILWAY_DEPLOYMENT.md` - Complete deployment guide
 
