@@ -21,7 +21,8 @@
       "buildCommand": "npm install --legacy-peer-deps && npm run build",
       "startCommand": "npm start",
       "healthcheckPath": "/",
-      "healthcheckTimeout": 100
+      "healthcheckTimeout": 100,
+      "port": 3000
     },
     {
       "name": "ml-server",
@@ -29,7 +30,8 @@
       "buildCommand": "python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r ../requirements-simple.txt",
       "startCommand": "/app/venv/bin/python ml-integration-example.py",
       "healthcheckPath": "/health",
-      "healthcheckTimeout": 100
+      "healthcheckTimeout": 100,
+      "port": 5000
     },
     {
       "name": "hope-ai",
@@ -37,7 +39,8 @@
       "buildCommand": "python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r ../requirements-simple.txt",
       "startCommand": "/app/venv/bin/python Hope.py",
       "healthcheckPath": "/health",
-      "healthcheckTimeout": 100
+      "healthcheckTimeout": 100,
+      "port": 5001
     }
   ]
 } 
