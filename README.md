@@ -132,13 +132,25 @@ npm run dev
 
 ## 🚀 **Deployment on Railway**
 
-### **Quick Deploy**
+### **Quick Deploy (Automatic)**
 
 1. **Sign up** at [railway.app](https://railway.app)
 2. **Connect GitHub** repository
-3. **Create 3 services** (Frontend, ML Server, Hope AI)
-4. **Add environment variables**
+3. **Railway will automatically detect and deploy all 3 services:**
+   - **Frontend** (Next.js)
+   - **ML Server** (Python Flask - Hate Speech Detection)
+   - **Hope AI** (Python Flask - Psychological Support)
+4. **Add environment variables** (see below)
 5. **Deploy automatically**
+
+### **Configuration Files**
+
+The project includes multiple Railway configuration files:
+
+- `railway.toml` - Main Railway configuration
+- `railway.json` - Alternative configuration
+- `nixpacks.toml` - Modern Nixpacks configuration
+- `Procfile` - Process definitions
 
 ### **Detailed Instructions**
 
