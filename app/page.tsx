@@ -157,6 +157,13 @@ function SocialMediaPlatform() {
             </div>
           </div>
           <div className="flex gap-2 items-center">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSupportChat(true)} 
+              className="flex items-center gap-2 bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100"
+            >
+              <Heart className="w-4 h-4" /> Get Support
+            </Button>
             <a href="/README.md#moderation--ai-policy" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline text-sm hover:text-blue-900">Moderation & AI Policy</a>
             <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
               <LogOut className="w-4 h-4" /> Logout
@@ -304,6 +311,17 @@ function SocialMediaPlatform() {
           </div>
         )}
         {showSupportChat && <SupportChatbot onClose={() => setShowSupportChat(false)} />}
+        
+        {/* Floating Support Button */}
+        <div className="fixed bottom-6 right-6 z-40">
+          <Button
+            onClick={() => setShowSupportChat(true)}
+            className="rounded-full w-14 h-14 bg-pink-600 hover:bg-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+            title="Get Mental Health Support"
+          >
+            <Heart className="w-6 h-6" />
+          </Button>
+        </div>
       </div>
     </div>
   )

@@ -8,6 +8,8 @@ A modern social media platform built with Next.js, React, and Supabase, featurin
 - User profiles
 - Posting and commenting
 - **AI-powered hate speech and abuse detection (Python ML server integration, fully operational)**
+- **Comprehensive psychological support chatbot with mental health resources**
+- **Crisis intervention and professional therapy referrals**
 - Like and report functionality for posts and comments
 - **Automatic reporting of flagged content to admins**
 - Admin dashboard for viewing and moderating reports
@@ -83,6 +85,23 @@ Visit [http://localhost:3000](http://localhost:3000) to view the app.
 - Admins can review, approve, or remove flagged content and ban users if necessary.
 - Users are notified if their comment is flagged and can appeal the decision via the support chatbot.
 
+## Psychological Support System
+
+- **24/7 Mental Health Support**: Accessible via the "Get Support" button in the header or floating support button
+- **Crisis Intervention**: Immediate access to crisis hotlines (988, Crisis Text Line, 911)
+- **Professional Therapy Referrals**: Direct links to licensed therapists and online therapy platforms
+- **Support Groups**: Connections to mental health support groups for various conditions
+- **Trauma-Informed Care**: AI chatbot trained to provide empathetic, validating responses
+- **Safety Planning**: Guidance for users experiencing abuse or harassment
+- **Resource Database**: Comprehensive database of mental health professionals and organizations
+
+### Support Features:
+
+- **Crisis Resources**: National Suicide Prevention Lifeline (988), Crisis Text Line, Emergency Services
+- **Therapy Platforms**: BetterHelp, Talkspace, Psychology Today directory
+- **Support Groups**: NAMI, Depression & Bipolar Support Alliance, specialized groups
+- **Self-Help Tools**: Meditation apps, mood tracking, crisis planning resources
+
 ---
 
 ## Troubleshooting ML Server Integration
@@ -112,9 +131,8 @@ Visit [http://localhost:3000](http://localhost:3000) to view the app.
 
 ## License
 
-
 ### Pitch deck
-https://safevoices-ai-for-gender-010570v.gamma.site/ 
 
+https://safevoices-ai-for-gender-010570v.gamma.site/
 
 MIT
