@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function AdminDashboard() {
   const { profile, isLoading } = useAuth();
@@ -17,6 +19,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [flaggedOnly, setFlaggedOnly] = useState<boolean>(false);
+  const [lastFetch, setLastFetch] = useState<number>(0);
 
   // SDG category keywords
   const SDG_CATEGORIES = [
@@ -39,16 +42,44 @@ export default function AdminDashboard() {
     if (profile?.is_admin) {
       fetchReports();
     }
-    // eslint-disable-next-line
   }, [profile]);
 
-  const fetchReports = async () => {
+  // Memoize filtered reports to prevent unnecessary re-renders
+  const filteredReports = useMemo(() => {
+    const filtered = reports.filter((report: any) => {
+      let matches = true;
+      if (flaggedOnly) {
+        matches = matches && (report.comment?.moderation_status === "flagged");
+      }
+      if (categoryFilter) {
+        const categories = report.comment?.categories || report.prediction?.categories || [];
+        matches = matches && categories.includes(categoryFilter);
+      }
+      return matches;
+    });
+
+    return filtered;
+  }, [reports, flaggedOnly, categoryFilter]);
+
+  const fetchReports = useCallback(async () => {
+    // Prevent multiple simultaneous requests
+    const now = Date.now();
+    if (now - lastFetch < 1000) return; // Debounce requests
+    
     setLoading(true);
     setError("");
+    setLastFetch(now);
+    
     try {
-      const res = await fetch("/api/admin/reports");
+      const res = await fetch("/api/admin/reports", {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await res.json();
       if (res.ok) {
+  
         setReports(data);
       } else {
         setError(data.error || "Failed to fetch reports");
@@ -58,51 +89,72 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [lastFetch]);
 
-  const handleDeleteComment = async (commentId: number) => {
+  const handleDeleteComment = useCallback(async (commentId: number) => {
     if (!commentId) return;
-    await fetch("/api/admin/moderate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "comment", id: commentId, action: "remove" })
-    });
-    fetchReports();
-  };
+    try {
+      await fetch("/api/admin/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "comment", id: commentId, action: "remove" })
+      });
+      fetchReports();
+    } catch (err) {
+      setError("Failed to delete comment");
+    }
+  }, [fetchReports]);
 
-  const handleBanUser = async (userId: string) => {
+  const handleBanUser = useCallback(async (userId: string) => {
     if (!userId) return;
-    await fetch("/api/admin/moderate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "user", id: userId, action: "ban" })
-    });
-    fetchReports();
-  };
+    try {
+      await fetch("/api/admin/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "user", id: userId, action: "ban" })
+      });
+      fetchReports();
+    } catch (err) {
+      setError("Failed to ban user");
+    }
+  }, [fetchReports]);
 
-  // Filtering logic
-  const filteredReports = reports.filter((report: any) => {
-    let matches = true;
-    if (flaggedOnly) {
-      matches = matches && (report.comment?.moderation_status === "flagged");
-    }
-    if (categoryFilter) {
-      // Try to match category in comment.categories or prediction.categories
-      const categories = report.comment?.categories || report.prediction?.categories || [];
-      matches = matches && categories.includes(categoryFilter);
-    }
-    return matches;
-  });
+
 
   if (isLoading || !profile?.is_admin) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading admin dashboard..." />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle>Admin Dashboard - Reported Comments</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Admin Dashboard - Reported Comments</CardTitle>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => router.push("/feed")}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to System
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={fetchReports}
+                disabled={loading}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {/* Filter Controls */}
@@ -124,8 +176,13 @@ export default function AdminDashboard() {
             <Button size="sm" variant="outline" onClick={() => { setFlaggedOnly(false); setCategoryFilter(""); }}>Reset Filters</Button>
           </div>
           {error && <Alert variant="destructive">{error}</Alert>}
+          <div className="mb-4 text-sm text-gray-600">
+            Total reports: {reports.length} | Filtered reports: {filteredReports.length}
+          </div>
           {loading ? (
-            <div>Loading reports...</div>
+            <div className="flex justify-center py-8">
+              <LoadingSpinner text="Loading reports..." />
+            </div>
           ) : filteredReports.length === 0 ? (
             <div className="text-gray-500">No reported comments.</div>
           ) : (
@@ -145,7 +202,7 @@ export default function AdminDashboard() {
               <TableBody>
                 {filteredReports.map((report) => (
                   <TableRow key={report.id}>
-                    <TableCell>{report.comment?.content || report.comment_content || "[Deleted]"}</TableCell>
+                    <TableCell>{report.comment?.content || report.comment_content || "[No content]"}</TableCell>
                     <TableCell>{report.reporter?.full_name || report.reporter?.username || report.reporter_id || "[Unknown]"}</TableCell>
                     <TableCell>{report.reported_user?.full_name || report.reported_user?.username || report.reported_user_id || "[Unknown]"}</TableCell>
                     <TableCell>{report.reason || "[No reason]"}</TableCell>

@@ -1,37 +1,128 @@
-# Node modules
+# Dependencies
 node_modules/
-
-# Build output
-.next/
-out/
-
-# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# OS files
-.DS_Store
-Thumbs.db
+# Production builds
+.next/
+out/
+build/
+dist/
 
-# Env files
+# Environment variables
 .env
 .env.*
 !.env.example
 .env.local
 
-# Supabase generated files
-.supabase/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# VSCode
+# AI Models and Data
+*.pkl
+*.joblib
+*.h5
+*.model
+training_data.db
+hope_training_data.db
+hope_model.pkl
+extracted_pdf_data_*.csv
+*.csv.bak
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
 .vscode/
-
-# Misc
+.idea/
 *.swp
 *.swo
+*~
 
-# Ignore lock files if you want (optional)
-# package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# Supabase
+.supabase/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/

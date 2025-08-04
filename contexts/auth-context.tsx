@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import { registerUser, loginUser, getProfile } from "@/lib/auth-supabase"
 import { supabase } from "@/lib/supabaseClient"
+import { useRouter } from "next/navigation"
 
 const AuthContext = createContext<any>(null)
 
@@ -10,6 +11,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     const getSession = async () => {
@@ -50,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   const login = async (data: any) => {
     try {
+      setIsLoading(true);
       await loginUser(data);
       // After login, fetch the session and profile
       const { data: { session } } = await supabase.auth.getSession();
@@ -62,9 +65,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       console.error("Login error:", err);
       return { success: false, error: err.message || "Login failed" };
+    } finally {
+      setIsLoading(false);
     }
   };
-  const logout = async () => { await supabase.auth.signOut(); setUser(null); setProfile(null) }
+  const logout = async () => { 
+    setIsLoading(true);
+    try {
+      await supabase.auth.signOut(); 
+      setUser(null); 
+      setProfile(null);
+      // Use Next.js router for smooth navigation to landing page
+      router.push('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <AuthContext.Provider value={{ user, profile, register, login, logout, isAuthenticated, isLoading }}>
