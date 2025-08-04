@@ -1,8 +1,14 @@
-# Use Node.js base image
-FROM node:18-alpine
+# Use Python base image with build tools
+FROM python:3.11-slim
 
-# Install Python and pip
-RUN apk add --no-cache python3 py3-pip
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -15,11 +21,11 @@ COPY requirements.txt ./
 RUN npm install --legacy-peer-deps
 
 # Create and activate Python virtual environment
-RUN python3 -m venv /app/venv
+RUN python -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
 # Install Python dependencies in virtual environment
-RUN /app/venv/bin/pip install -r requirements.txt
+RUN /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install -r requirements.txt
 
 # Copy source code
 COPY . .

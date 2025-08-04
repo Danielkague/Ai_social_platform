@@ -1,11 +1,12 @@
 [phases.setup]
-nixPkgs = ["nodejs", "python3", "python3Packages.pip", "python3Packages.virtualenv"]
+nixPkgs = ["nodejs", "python3", "python3Packages.pip", "python3Packages.virtualenv", "gcc", "gfortran", "openblas"]
 
 [phases.install]
 cmds = [
   "npm install --legacy-peer-deps",
   "python3 -m venv /app/venv",
-  "/app/venv/bin/pip install -r requirements.txt"
+  "/app/venv/bin/pip install --upgrade pip",
+  "/app/venv/bin/pip install --only-binary=all -r requirements.txt"
 ]
 
 [phases.build]
