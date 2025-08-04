@@ -11,6 +11,7 @@
     "restartPolicyMaxRetries": 10
   },
   "variables": {
-    "NPM_CONFIG_PACKAGE_MANAGER": "npm"
+    "NPM_CONFIG_PACKAGE_MANAGER": "npm",
+    "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
   }
 } 
