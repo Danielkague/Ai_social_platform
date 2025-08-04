@@ -37,7 +37,7 @@ A revolutionary social media platform built with Next.js, React, and Supabase, f
 ### **Frontend**
 
 - **Next.js 15** - React framework with App Router
-- **React 19** - Latest React with modern features
+- **React 18.3.1** - Stable React version with full compatibility
 - **Tailwind CSS** - Utility-first CSS framework
 - **Radix UI** - Accessible component primitives
 - **Lucide React** - Beautiful icon library
@@ -86,9 +86,16 @@ pip install flask flask-cors numpy scikit-learn pandas
 Create a `.env.local` file in the project root:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+# Supabase Configuration (Required)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# AI Services URLs (for Railway deployment)
+NEXT_PUBLIC_ML_SERVICE_URL=http://localhost:5000
+NEXT_PUBLIC_HOPE_AI_URL=http://localhost:5001
 ```
+
+**Note:** For Railway deployment, you'll need to set these environment variables in your Railway project settings.
 
 ### **4. Database Setup**
 
