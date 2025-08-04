@@ -29,7 +29,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configure CORS properly for Next.js integration
-CORS(app, origins=["http://localhost:3000", "https://*.vercel.app"],
+CORS(app, origins=["http://localhost:3000", "https://*.vercel.app", "https://*.railway.app"],
      methods=["GET", "POST"],
      allow_headers=["Content-Type"])
 

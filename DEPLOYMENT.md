@@ -1,17 +1,17 @@
-# Deployment Guide - Hope Social Media Platform
+# Deployment Guide - Hope Social Media Platform (Railway)
 
-This guide explains how to deploy the Hope Social Media platform on Render, including the Next.js frontend and two Python AI servers.
+This guide explains how to deploy the Hope Social Media platform on Railway, including the Next.js frontend and two Python AI servers.
 
 ## 🚀 **Deployment Overview**
 
 The platform consists of three services:
-1. **Frontend** - Next.js application (Port 3000)
-2. **ML Server** - Hate speech detection AI (Port 5000)
-3. **Hope AI** - Psychological support AI (Port 5001)
+1. **Frontend** - Next.js application
+2. **ML Server** - Hate speech detection AI
+3. **Hope AI** - Psychological support AI
 
 ## 📋 **Prerequisites**
 
-1. **Render Account** - Sign up at [render.com](https://render.com)
+1. **Railway Account** - Sign up at [railway.app](https://railway.app)
 2. **Supabase Project** - Set up at [supabase.com](https://supabase.com)
 3. **GitHub Repository** - Push your code to GitHub
 
@@ -26,7 +26,7 @@ hope-social-media/
 │   └── Hope.py                    # Psychological support
 ├── requirements.txt        # Python dependencies
 ├── package.json           # Node.js dependencies
-├── render.yaml            # Render configuration
+├── railway.json           # Railway configuration
 └── README.md
 ```
 
@@ -35,51 +35,77 @@ Create these in your Supabase project:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-## 🎯 **Step 2: Deploy on Render**
+## 🎯 **Step 2: Deploy on Railway**
 
-### **Option A: Using render.yaml (Recommended)**
-
-1. **Push to GitHub** - Ensure your code is in a GitHub repository
-2. **Connect to Render** - Link your GitHub repository in Render
-3. **Auto-Deploy** - Render will automatically detect the `render.yaml` file
-4. **Configure Environment Variables** - Add your Supabase credentials
-
-### **Option B: Manual Deployment**
+### **Option A: Using Railway Dashboard (Recommended)**
 
 #### **1. Deploy Frontend**
-- **Service Type**: Web Service
-- **Environment**: Node
-- **Build Command**: `npm install --legacy-peer-deps && npm run build`
-- **Start Command**: `npm start`
-- **Environment Variables**:
-  - `NODE_ENV=production`
-  - `NEXT_PUBLIC_SUPABASE_URL=your-supabase-url`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key`
+1. **Create New Project** - Go to Railway dashboard
+2. **Deploy from GitHub** - Connect your repository
+3. **Select Service Type** - Choose "Web Service"
+4. **Configure Settings**:
+   - **Name**: `hope-social-media-frontend`
+   - **Build Command**: `npm install --legacy-peer-deps && npm run build`
+   - **Start Command**: `npm start`
+   - **Environment**: Node.js (auto-detected)
 
 #### **2. Deploy ML Server (Hate Speech Detection)**
-- **Service Type**: Web Service
-- **Environment**: Python
-- **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `python scripts/ml-integration-example.py`
-- **Environment Variables**:
-  - `PYTHON_VERSION=3.11`
-  - `PORT=5000`
+1. **Add Service** - In the same project
+2. **Select Repository** - Same GitHub repo
+3. **Configure Settings**:
+   - **Name**: `hope-ml-server`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python scripts/ml-integration-example.py`
+   - **Environment**: Python (auto-detected)
 
 #### **3. Deploy Hope AI Server (Psychological Support)**
-- **Service Type**: Web Service
-- **Environment**: Python
-- **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `python scripts/Hope.py`
-- **Environment Variables**:
-  - `PYTHON_VERSION=3.11`
-  - `PORT=5001`
+1. **Add Service** - In the same project
+2. **Select Repository** - Same GitHub repo
+3. **Configure Settings**:
+   - **Name**: `hope-ai-server`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python scripts/Hope.py`
+   - **Environment**: Python (auto-detected)
 
-## 🔗 **Step 3: Update Frontend Configuration**
+### **Option B: Using Railway CLI**
+
+```bash
+# Install Railway CLI
+npm install -g @railway/cli
+
+# Login to Railway
+railway login
+
+# Initialize project
+railway init
+
+# Deploy services
+railway up
+```
+
+## 🔗 **Step 3: Configure Environment Variables**
+
+### **Frontend Environment Variables**
+In Railway dashboard → Frontend service → Variables:
+```
+NODE_ENV=production
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+### **AI Servers Environment Variables**
+For both ML Server and Hope AI Server:
+```
+PYTHON_VERSION=3.11
+PORT=5000  # or 5001 for Hope AI
+```
+
+## 🌐 **Step 4: Update Frontend Configuration**
 
 After deployment, update the frontend to use the new AI server URLs:
 
 ### **Update API Routes**
-In your frontend code, replace localhost URLs with Render URLs:
+In your frontend code, replace localhost URLs with Railway URLs:
 
 ```javascript
 // Before (local development)
@@ -87,27 +113,14 @@ const ML_SERVER_URL = 'http://localhost:5000';
 const HOPE_SERVER_URL = 'http://localhost:5001';
 
 // After (production)
-const ML_SERVER_URL = 'https://your-ml-server.onrender.com';
-const HOPE_SERVER_URL = 'https://your-hope-server.onrender.com';
+const ML_SERVER_URL = 'https://your-ml-server.railway.app';
+const HOPE_SERVER_URL = 'https://your-hope-server.railway.app';
 ```
 
 ### **Files to Update**
 - `app/api/posts/route.ts`
 - `app/api/comments/route.ts`
 - `app/api/support-chat/route.ts`
-
-## 🌐 **Step 4: Configure CORS**
-
-The AI servers are already configured with CORS for production. If you need to update:
-
-```python
-# In both AI server files
-CORS(app, origins=[
-    "http://localhost:3000",
-    "https://your-frontend.onrender.com",
-    "https://*.vercel.app"
-])
-```
 
 ## 🔍 **Step 5: Test Deployment**
 
@@ -116,13 +129,13 @@ Test each service:
 
 ```bash
 # Frontend
-curl https://your-frontend.onrender.com
+curl https://your-frontend.railway.app
 
 # ML Server
-curl https://your-ml-server.onrender.com/health
+curl https://your-ml-server.railway.app/health
 
 # Hope AI
-curl https://your-hope-server.onrender.com/health
+curl https://your-hope-server.railway.app/health
 ```
 
 ### **Functionality Tests**
@@ -133,7 +146,7 @@ curl https://your-hope-server.onrender.com/health
 
 ## 📊 **Step 6: Monitor and Maintain**
 
-### **Render Dashboard**
+### **Railway Dashboard**
 - Monitor service health
 - Check logs for errors
 - Monitor resource usage
@@ -174,7 +187,7 @@ npm install --legacy-peer-deps
 
 ### **Logs and Debugging**
 ```bash
-# View service logs in Render dashboard
+# View service logs in Railway dashboard
 # Check for specific error messages
 # Verify environment variables are set
 ```
@@ -183,7 +196,7 @@ npm install --legacy-peer-deps
 
 ### **Environment Variables**
 - Never commit sensitive data
-- Use Render's secure environment variable storage
+- Use Railway's secure environment variable storage
 - Rotate keys regularly
 
 ### **API Security**
@@ -209,9 +222,23 @@ npm install --legacy-peer-deps
 - Consider read replicas
 
 ### **CDN Integration**
-- Use Render's CDN for static assets
+- Use Railway's CDN for static assets
 - Optimize image delivery
 - Implement caching strategies
+
+## 💰 **Railway Pricing**
+
+### **Free Tier**
+- **$5 credit** - Monthly free credit
+- **Shared CPU** - Basic performance
+- **512MB RAM** - Limited memory
+- **Perfect for development/testing**
+
+### **Pro Plan**
+- **Pay-as-you-use** - Only pay for what you use
+- **Dedicated CPU** - Better performance
+- **More RAM** - Higher memory limits
+- **Custom domains** - Professional URLs
 
 ## 🎉 **Success Metrics**
 
@@ -237,9 +264,9 @@ npm install --legacy-peer-deps
 ## 📞 **Support**
 
 For deployment issues:
-1. Check Render documentation
+1. Check Railway documentation
 2. Review service logs
 3. Test locally first
-4. Contact support if needed
+4. Contact Railway support if needed
 
-**Happy Deploying! 🚀** 
+**Happy Deploying on Railway! 🚀** 

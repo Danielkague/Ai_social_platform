@@ -108,6 +108,18 @@ npm run dev
 - **ML Server**: [http://localhost:5000](http://localhost:5000)
 - **Hope AI**: [http://localhost:5001](http://localhost:5001)
 
+## 🚀 **Deployment on Railway**
+
+### **Quick Deploy**
+1. **Sign up** at [railway.app](https://railway.app)
+2. **Connect GitHub** repository
+3. **Create 3 services** (Frontend, ML Server, Hope AI)
+4. **Add environment variables**
+5. **Deploy automatically**
+
+### **Detailed Instructions**
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for comprehensive Railway deployment guide.
+
 ## 🎯 **Core Features Deep Dive**
 
 ### **🤖 AI Content Moderation**
