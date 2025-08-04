@@ -26,16 +26,16 @@
     {
       "name": "ml-server",
       "sourceDir": "scripts",
-      "buildCommand": "python -m pip install -r ../requirements.txt",
-      "startCommand": "python ml-integration-example.py",
+      "buildCommand": "python3 -m venv /app/venv && /app/venv/bin/pip install -r ../requirements.txt",
+      "startCommand": "/app/venv/bin/python ml-integration-example.py",
       "healthcheckPath": "/health",
       "healthcheckTimeout": 100
     },
     {
       "name": "hope-ai",
       "sourceDir": "scripts",
-      "buildCommand": "python -m pip install -r ../requirements.txt",
-      "startCommand": "python Hope.py",
+      "buildCommand": "python3 -m venv /app/venv && /app/venv/bin/pip install -r ../requirements.txt",
+      "startCommand": "/app/venv/bin/python Hope.py",
       "healthcheckPath": "/health",
       "healthcheckTimeout": 100
     }

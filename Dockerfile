@@ -14,8 +14,12 @@ COPY requirements.txt ./
 # Install Node.js dependencies
 RUN npm install --legacy-peer-deps
 
-# Install Python dependencies
-RUN python3 -m pip install -r requirements.txt
+# Create and activate Python virtual environment
+RUN python3 -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
+
+# Install Python dependencies in virtual environment
+RUN /app/venv/bin/pip install -r requirements.txt
 
 # Copy source code
 COPY . .
