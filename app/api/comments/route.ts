@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabaseClient"
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-const ML_SERVER_URL = "http://localhost:5000";
+const ML_SERVER_URL = process.env.NEXT_PUBLIC_ML_SERVICE_URL || "http://localhost:5000";
 // Helper: Call ML server for moderation
 async function moderateContent(content: string) {
   const res = await fetch(ML_SERVER_URL + "/predict-hate-speech", {

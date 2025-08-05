@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-const ML_SERVER_URL = process.env.ML_SERVER_URL || "http://localhost:5000"
+const ML_SERVER_URL = process.env.NEXT_PUBLIC_ML_SERVICE_URL || "http://localhost:5000"
 
 export async function GET() {
   try {

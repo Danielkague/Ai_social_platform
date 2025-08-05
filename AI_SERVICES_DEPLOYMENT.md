@@ -76,6 +76,25 @@ If services fail to start:
 3. Ensure environment variables are set correctly
 4. Check that the health check endpoints are accessible
 
+### **Alternative Build Commands**
+
+If the main build command fails, try these alternatives:
+
+**Option 1: Use requirements-simple.txt**
+```bash
+python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r requirements-simple.txt
+```
+
+**Option 2: Use build script**
+```bash
+chmod +x build.sh && ./build.sh
+```
+
+**Option 3: Direct pip install**
+```bash
+pip install Flask==2.3.3 Flask-CORS==4.0.0 numpy==1.24.3 scikit-learn==1.3.0 pandas==2.0.3 scipy==1.11.1 joblib==1.3.2
+```
+
 ### **Alternative: Local AI Services**
 
 If Railway deployment is problematic, you can run AI services locally:
@@ -101,4 +120,5 @@ NEXT_PUBLIC_HOPE_AI_URL=http://localhost:5001
 - Make sure the `scripts/requirements.txt` file exists and contains all necessary dependencies
 - The build command uses `requirements.txt` (not `../requirements-simple.txt`)
 - Each service should have its own port configuration
-- Health check endpoints are available at `/health` for both services 
+- Health check endpoints are available at `/health` for both services
+- Multiple build command options are provided as fallbacks 

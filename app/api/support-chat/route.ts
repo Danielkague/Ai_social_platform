@@ -321,7 +321,7 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           // Send request to Hope AI
-          const hopeResponse = await fetch('http://localhost:5001/counsel', {
+          const hopeResponse = await fetch(`${process.env.NEXT_PUBLIC_HOPE_AI_URL || 'http://localhost:5001'}/counsel`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

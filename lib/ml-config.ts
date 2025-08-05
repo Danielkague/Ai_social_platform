@@ -1,6 +1,6 @@
 // ML Server Configuration
 export const ML_CONFIG = {
-  SERVER_URL: process.env.ML_SERVER_URL || 'http://localhost:5000',
+  SERVER_URL: process.env.NEXT_PUBLIC_ML_SERVICE_URL || 'http://localhost:5000',
   USE_ML_MODEL: process.env.USE_ML_MODEL !== 'false', // Default to true
   TIMEOUT: 5000, // 5 seconds
   RETRY_ATTEMPTS: 2,

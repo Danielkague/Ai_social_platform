@@ -1,6 +1,6 @@
 export const config = {
   // ML Model Configuration
-  ML_SERVER_URL: process.env.ML_SERVER_URL || "http://localhost:5000",
+  ML_SERVER_URL: process.env.NEXT_PUBLIC_ML_SERVICE_URL || "http://localhost:5000",
   USE_ML_MODEL: process.env.USE_ML_MODEL !== "false",
 
   // API Configuration
