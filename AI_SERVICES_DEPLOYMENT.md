@@ -94,4 +94,11 @@ Then update your frontend environment variables to point to localhost:
 ```env
 NEXT_PUBLIC_ML_SERVICE_URL=http://localhost:5000
 NEXT_PUBLIC_HOPE_AI_URL=http://localhost:5001
-``` 
+```
+
+### **Important Notes**
+
+- Make sure the `scripts/requirements.txt` file exists and contains all necessary dependencies
+- The build command uses `requirements.txt` (not `../requirements-simple.txt`)
+- Each service should have its own port configuration
+- Health check endpoints are available at `/health` for both services 
