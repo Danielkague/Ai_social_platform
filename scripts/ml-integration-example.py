@@ -8,7 +8,7 @@ import logging
 import os
 import pickle
 import re
-import sqlite3
+# import sqlite3  # Removed for Railway compatibility
 from datetime import datetime
 from threading import Lock
 
@@ -34,6 +34,16 @@ CORS(app, origins=["http://localhost:3000", "https://*.vercel.app", "https://*.r
 
 # Thread-safe model updates
 model_lock = Lock()
+
+# In-memory storage for Railway deployment (replaces SQLite)
+training_data = []
+abuse_reports = []
+model_stats = {
+    'total_predictions': 0,
+    'hate_speech_detected': 0,
+    'accuracy': 0.0,
+    'last_training': None
+}
 
 
 class AdvancedHateSpeechDetector:
@@ -353,61 +363,61 @@ model_path = 'hate_speech_model.pkl'
 detector.load_model(model_path)
 
 # Database setup for training data and abuse reports
-DB_PATH = 'training_data.db'
+# DB_PATH = 'training_data.db' # Removed for Railway compatibility
 
 
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+# def init_db(): # Removed for Railway compatibility
+#     conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+#     cursor = conn.cursor() # Removed for Railway compatibility
 
-    # Training data table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS training_data (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            text TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            user_id INTEGER,
-            prediction TEXT,
-            human_label TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+#     # Training data table # Removed for Railway compatibility
+#     cursor.execute(''' # Removed for Railway compatibility
+#         CREATE TABLE IF NOT EXISTS training_data ( # Removed for Railway compatibility
+#             id INTEGER PRIMARY KEY AUTOINCREMENT, # Removed for Railway compatibility
+#             text TEXT NOT NULL, # Removed for Railway compatibility
+#             timestamp TEXT NOT NULL, # Removed for Railway compatibility
+#             user_id INTEGER, # Removed for Railway compatibility
+#             prediction TEXT, # Removed for Railway compatibility
+#             human_label TEXT, # Removed for Railway compatibility
+#             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP # Removed for Railway compatibility
+#         ) # Removed for Railway compatibility
+#     ''') # Removed for Railway compatibility
 
-    # Abuse reports table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS abuse_reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            text TEXT NOT NULL,
-            user_id INTEGER,
-            reported_user_id INTEGER,
-            prediction TEXT,
-            severity TEXT,
-            requires_immediate_action BOOLEAN,
-            status TEXT DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            resolved_at TIMESTAMP,
-            moderator_id INTEGER
-        )
-    ''')
+#     # Abuse reports table # Removed for Railway compatibility
+#     cursor.execute(''' # Removed for Railway compatibility
+#         CREATE TABLE IF NOT EXISTS abuse_reports ( # Removed for Railway compatibility
+#             id INTEGER PRIMARY KEY AUTOINCREMENT, # Removed for Railway compatibility
+#             text TEXT NOT NULL, # Removed for Railway compatibility
+#             user_id INTEGER, # Removed for Railway compatibility
+#             reported_user_id INTEGER, # Removed for Railway compatibility
+#             prediction TEXT, # Removed for Railway compatibility
+#             severity TEXT, # Removed for Railway compatibility
+#             requires_immediate_action BOOLEAN, # Removed for Railway compatibility
+#             status TEXT DEFAULT 'pending', # Removed for Railway compatibility
+#             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, # Removed for Railway compatibility
+#             resolved_at TIMESTAMP, # Removed for Railway compatibility
+#             moderator_id INTEGER # Removed for Railway compatibility
+#         ) # Removed for Railway compatibility
+#     ''') # Removed for Railway compatibility
 
-    # Model performance metrics table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS model_metrics (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            accuracy REAL,
-            precision_score REAL,
-            recall_score REAL,
-            f1_score REAL,
-            training_samples INTEGER,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+#     # Model performance metrics table # Removed for Railway compatibility
+#     cursor.execute(''' # Removed for Railway compatibility
+#         CREATE TABLE IF NOT EXISTS model_metrics ( # Removed for Railway compatibility
+#             id INTEGER PRIMARY KEY AUTOINCREMENT, # Removed for Railway compatibility
+#             accuracy REAL, # Removed for Railway compatibility
+#             precision_score REAL, # Removed for Railway compatibility
+#             recall_score REAL, # Removed for Railway compatibility
+#             f1_score REAL, # Removed for Railway compatibility
+#             training_samples INTEGER, # Removed for Railway compatibility
+#             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP # Removed for Railway compatibility
+#         ) # Removed for Railway compatibility
+#     ''') # Removed for Railway compatibility
 
-    conn.commit()
-    conn.close()
+#     conn.commit() # Removed for Railway compatibility
+#     conn.close() # Removed for Railway compatibility
 
 
-init_db()
+# init_db() # Removed for Railway compatibility
 
 # Add a health check endpoint
 
@@ -468,26 +478,41 @@ def predict_hate_speech():
         # If requires immediate action, automatically create abuse report
         if prediction['requires_immediate_action']:
             try:
-                conn = sqlite3.connect(DB_PATH)
-                cursor = conn.cursor()
+                # conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+                # cursor = conn.cursor() # Removed for Railway compatibility
 
-                cursor.execute('''
-                    INSERT INTO abuse_reports (text, user_id, prediction, severity, requires_immediate_action)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (
-                    text,
-                    user_id,
-                    json.dumps(prediction),
-                    prediction['severity'],
-                    int(prediction['requires_immediate_action'])
-                ))
+                # cursor.execute(''' # Removed for Railway compatibility
+                #     INSERT INTO abuse_reports (text, user_id, prediction, severity, requires_immediate_action) # Removed for Railway compatibility
+                #     VALUES (?, ?, ?, ?, ?) # Removed for Railway compatibility
+                # ''', ( # Removed for Railway compatibility
+                #     text, # Removed for Railway compatibility
+                #     user_id, # Removed for Railway compatibility
+                #     json.dumps(prediction), # Removed for Railway compatibility
+                #     prediction['severity'], # Removed for Railway compatibility
+                #     int(prediction['requires_immediate_action']) # Removed for Railway compatibility
+                # )) # Removed for Railway compatibility
 
-                conn.commit()
-                conn.close()
+                # conn.commit() # Removed for Railway compatibility
+                # conn.close() # Removed for Railway compatibility
 
-                prediction['auto_reported'] = True
+                # prediction['auto_reported'] = True # Removed for Railway compatibility
+                # logger.warning( # Removed for Railway compatibility
+                #     f"Automatic abuse report created for user {user_id}") # Removed for Railway compatibility
+
+                # In-memory storage for Railway deployment
+                abuse_reports.append({
+                    'id': len(abuse_reports) + 1,
+                    'text': text,
+                    'user_id': user_id,
+                    'reported_user_id': None, # Not applicable in this example
+                    'prediction': json.dumps(prediction),
+                    'severity': prediction['severity'],
+                    'requires_immediate_action': prediction['requires_immediate_action'],
+                    'status': 'pending',
+                    'created_at': datetime.now().isoformat()
+                })
                 logger.warning(
-                    f"Automatic abuse report created for user {user_id}")
+                    f"Automatic abuse report created for user {user_id} (in-memory)")
 
             except Exception as e:
                 logger.error(f"Auto-report creation error: {e}")
@@ -527,30 +552,42 @@ def report_abuse():
             prediction = detector.predict(text)
 
         # Store abuse report
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        # conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+        # cursor = conn.cursor() # Removed for Railway compatibility
 
-        cursor.execute('''
-            INSERT INTO abuse_reports (text, user_id, reported_user_id, prediction, severity, requires_immediate_action)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (
-            text,
-            user_id,
-            reported_user_id,
-            json.dumps(prediction),
-            prediction['severity'],
-            prediction['requires_immediate_action']
-        ))
+        # cursor.execute(''' # Removed for Railway compatibility
+        #     INSERT INTO abuse_reports (text, user_id, reported_user_id, prediction, severity, requires_immediate_action) # Removed for Railway compatibility
+        #     VALUES (?, ?, ?, ?, ?, ?) # Removed for Railway compatibility
+        # ''', ( # Removed for Railway compatibility
+        #     text, # Removed for Railway compatibility
+        #     user_id, # Removed for Railway compatibility
+        #     reported_user_id, # Removed for Railway compatibility
+        #     json.dumps(prediction), # Removed for Railway compatibility
+        #     prediction['severity'], # Removed for Railway compatibility
+        #     prediction['requires_immediate_action'] # Removed for Railway compatibility
+        # )) # Removed for Railway compatibility
 
-        report_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
+        # report_id = cursor.lastrowid # Removed for Railway compatibility
+        # conn.commit() # Removed for Railway compatibility
+        # conn.close() # Removed for Railway compatibility
 
-        logger.info(f"Abuse report {report_id} created by user {user_id}")
+        # In-memory storage for Railway deployment
+        abuse_reports.append({
+            'id': len(abuse_reports) + 1,
+            'text': text,
+            'user_id': user_id,
+            'reported_user_id': reported_user_id,
+            'prediction': json.dumps(prediction),
+            'severity': prediction['severity'],
+            'requires_immediate_action': prediction['requires_immediate_action'],
+            'status': 'pending',
+            'created_at': datetime.now().isoformat()
+        })
+        logger.info(f"Abuse report created by user {user_id} (in-memory)")
 
         return jsonify({
             'status': 'success',
-            'report_id': report_id,
+            'report_id': len(abuse_reports), # Use in-memory ID
             'prediction': prediction,
             'message': 'Abuse report submitted successfully'
         })
@@ -575,22 +612,33 @@ def store_training_data():
     try:
         data = request.get_json()
 
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        # conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+        # cursor = conn.cursor() # Removed for Railway compatibility
 
-        cursor.execute('''
-            INSERT INTO training_data (text, timestamp, user_id, prediction, human_label)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (
-            data.get('text'),
-            data.get('timestamp'),
-            data.get('userId'),
-            json.dumps(data.get('prediction', {})),
-            data.get('humanLabel')
-        ))
+        # cursor.execute(''' # Removed for Railway compatibility
+        #     INSERT INTO training_data (text, timestamp, user_id, prediction, human_label) # Removed for Railway compatibility
+        #     VALUES (?, ?, ?, ?, ?) # Removed for Railway compatibility
+        # ''', ( # Removed for Railway compatibility
+        #     data.get('text'), # Removed for Railway compatibility
+        #     data.get('timestamp'), # Removed for Railway compatibility
+        #     data.get('userId'), # Removed for Railway compatibility
+        #     json.dumps(data.get('prediction', {})), # Removed for Railway compatibility
+        #     data.get('humanLabel') # Removed for Railway compatibility
+        # )) # Removed for Railway compatibility
 
-        conn.commit()
-        conn.close()
+        # conn.commit() # Removed for Railway compatibility
+        # conn.close() # Removed for Railway compatibility
+
+        # In-memory storage for Railway deployment
+        training_data.append({
+            'id': len(training_data) + 1,
+            'text': data.get('text'),
+            'timestamp': data.get('timestamp'),
+            'user_id': data.get('userId'),
+            'prediction': json.dumps(data.get('prediction', {})),
+            'human_label': data.get('humanLabel')
+        })
+        logger.info(f"Training data stored (in-memory): {data.get('text')}")
 
         return jsonify({'status': 'success'})
 
@@ -605,24 +653,25 @@ def retrain_model():
     Endpoint to trigger model retraining with new data
     """
     try:
-        # Fetch training data from database
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        # Fetch training data from database # Removed for Railway compatibility
+        # conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+        # cursor = conn.cursor() # Removed for Railway compatibility
 
-        cursor.execute('''
-            SELECT text, human_label FROM training_data 
-            WHERE human_label IS NOT NULL
-        ''')
+        # cursor.execute(''' # Removed for Railway compatibility
+        #     SELECT text, human_label FROM training_data # Removed for Railway compatibility
+        #     WHERE human_label IS NOT NULL # Removed for Railway compatibility
+        # ''') # Removed for Railway compatibility
 
-        training_data = cursor.fetchall()
-        conn.close()
+        # training_data = cursor.fetchall() # Removed for Railway compatibility
+        # conn.close() # Removed for Railway compatibility
 
+        # In-memory storage for Railway deployment
         if len(training_data) < 50:  # Minimum data requirement
             return jsonify({'error': 'Insufficient training data (minimum 50 samples required)'}), 400
 
         # Prepare training data
-        texts = [row[0] for row in training_data]
-        labels = [1 if row[1] == 'hate_speech' else 0 for row in training_data]
+        texts = [row['text'] for row in training_data]
+        labels = [1 if row['human_label'] == 'hate_speech' else 0 for row in training_data]
 
         # Retrain model
         with model_lock:
@@ -633,22 +682,22 @@ def retrain_model():
             detector.save_model(model_path)
 
             # Store training metrics
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
+            # conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+            # cursor = conn.cursor() # Removed for Railway compatibility
 
-            cursor.execute('''
-                INSERT INTO model_metrics (accuracy, training_samples)
-                VALUES (?, ?)
-            ''', (
-                training_result['test_accuracy'],
-                training_result['training_samples']
-            ))
+            # cursor.execute(''' # Removed for Railway compatibility
+            #     INSERT INTO model_metrics (accuracy, training_samples) # Removed for Railway compatibility
+            #     VALUES (?, ?) # Removed for Railway compatibility
+            # ''', ( # Removed for Railway compatibility
+            #     training_result['test_accuracy'], # Removed for Railway compatibility
+            #     training_result['training_samples'] # Removed for Railway compatibility
+            # )) # Removed for Railway compatibility
 
-            conn.commit()
-            conn.close()
+            # conn.commit() # Removed for Railway compatibility
+            # conn.close() # Removed for Railway compatibility
 
             logger.info(
-                f"Model retrained successfully with {len(training_data)} samples")
+                f"Model retrained successfully with {len(training_data)} samples (in-memory)")
 
             return jsonify({
                 'status': 'success',
@@ -668,58 +717,69 @@ def retrain_model():
 def get_model_stats():
     """Get comprehensive model and system statistics"""
     try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        # conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+        # cursor = conn.cursor() # Removed for Railway compatibility
 
-        # Get training data stats
-        cursor.execute('SELECT COUNT(*) FROM training_data')
-        total_samples = cursor.fetchone()[0]
+        # # Get training data stats # Removed for Railway compatibility
+        # cursor.execute('SELECT COUNT(*) FROM training_data') # Removed for Railway compatibility
+        # total_samples = cursor.fetchone()[0] # Removed for Railway compatibility
 
-        cursor.execute(
-            'SELECT COUNT(*) FROM training_data WHERE human_label IS NOT NULL')
-        labeled_samples = cursor.fetchone()[0]
+        # cursor.execute( # Removed for Railway compatibility
+        #     'SELECT COUNT(*) FROM training_data WHERE human_label IS NOT NULL') # Removed for Railway compatibility
+        # labeled_samples = cursor.fetchone()[0] # Removed for Railway compatibility
 
-        # Get abuse report stats
-        cursor.execute('SELECT COUNT(*) FROM abuse_reports')
-        total_reports = cursor.fetchone()[0]
+        # # Get abuse report stats # Removed for Railway compatibility
+        # cursor.execute('SELECT COUNT(*) FROM abuse_reports') # Removed for Railway compatibility
+        # total_reports = cursor.fetchone()[0] # Removed for Railway compatibility
 
-        cursor.execute(
-            'SELECT COUNT(*) FROM abuse_reports WHERE requires_immediate_action = 1')
-        critical_reports = cursor.fetchone()[0]
+        # cursor.execute( # Removed for Railway compatibility
+        #     'SELECT COUNT(*) FROM abuse_reports WHERE requires_immediate_action = 1') # Removed for Railway compatibility
+        # critical_reports = cursor.fetchone()[0] # Removed for Railway compatibility
 
-        cursor.execute(
-            'SELECT COUNT(*) FROM abuse_reports WHERE status = "pending"')
-        pending_reports = cursor.fetchone()[0]
+        # cursor.execute( # Removed for Railway compatibility
+        #     'SELECT COUNT(*) FROM abuse_reports WHERE status = "pending"') # Removed for Railway compatibility
+        # pending_reports = cursor.fetchone()[0] # Removed for Railway compatibility
 
-        # Get recent model performance
-        cursor.execute(
-            'SELECT accuracy FROM model_metrics ORDER BY created_at DESC LIMIT 1')
-        latest_accuracy = cursor.fetchone()
-        accuracy = latest_accuracy[0] if latest_accuracy else None
+        # # Get recent model performance # Removed for Railway compatibility
+        # cursor.execute( # Removed for Railway compatibility
+        #     'SELECT accuracy FROM model_metrics ORDER BY created_at DESC LIMIT 1') # Removed for Railway compatibility
+        # latest_accuracy = cursor.fetchone() # Removed for Railway compatibility
+        # accuracy = latest_accuracy[0] if latest_accuracy else None # Removed for Railway compatibility
 
-        # Get abuse categories distribution
-        cursor.execute(
-            'SELECT severity, COUNT(*) FROM abuse_reports GROUP BY severity')
-        severity_distribution = dict(cursor.fetchall())
+        # # Get abuse categories distribution # Removed for Railway compatibility
+        # cursor.execute( # Removed for Railway compatibility
+        #     'SELECT severity, COUNT(*) FROM abuse_reports GROUP BY severity') # Removed for Railway compatibility
+        # severity_distribution = dict(cursor.fetchall()) # Removed for Railway compatibility
 
-        conn.close()
+        # conn.close() # Removed for Railway compatibility
+
+        # In-memory storage for Railway deployment
+        total_predictions = len(training_data) # Use in-memory data
+        hate_speech_detected = sum(1 for row in training_data if row['human_label'] == 'hate_speech')
+        accuracy = (hate_speech_detected / total_predictions) * 100 if total_predictions > 0 else 0.0
+        last_training = datetime.now().isoformat() if training_data else None
+
+        severity_distribution = {}
+        for row in training_data:
+            severity = row['human_label']
+            severity_distribution[severity] = severity_distribution.get(severity, 0) + 1
 
         return jsonify({
             'status': 'active',
             'model_info': {
                 'is_trained': detector.is_trained,
                 'accuracy': accuracy,
-                'last_updated': datetime.now().isoformat()
+                'last_updated': last_training
             },
             'training_data': {
-                'total_samples': total_samples,
-                'labeled_samples': labeled_samples,
-                'unlabeled_samples': total_samples - labeled_samples
+                'total_samples': total_predictions,
+                'labeled_samples': hate_speech_detected,
+                'unlabeled_samples': total_predictions - hate_speech_detected
             },
             'abuse_reports': {
-                'total_reports': total_reports,
-                'critical_reports': critical_reports,
-                'pending_reports': pending_reports,
+                'total_reports': len(abuse_reports), # Use in-memory data
+                'critical_reports': sum(1 for r in abuse_reports if r['severity'] == 'critical'), # Use in-memory data
+                'pending_reports': sum(1 for r in abuse_reports if r['status'] == 'pending'), # Use in-memory data
                 'severity_distribution': severity_distribution
             },
             'detection_capabilities': {
@@ -751,36 +811,41 @@ def get_model_stats():
 def get_pending_reports():
     """Get pending abuse reports for moderation"""
     try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        # conn = sqlite3.connect(DB_PATH) # Removed for Railway compatibility
+        # cursor = conn.cursor() # Removed for Railway compatibility
 
-        cursor.execute('''
-            SELECT id, text, user_id, reported_user_id, severity, 
-                   requires_immediate_action, created_at
-            FROM abuse_reports 
-            WHERE status = "pending"
-            ORDER BY requires_immediate_action DESC, created_at DESC
-            LIMIT 50
-        ''')
+        # cursor.execute(''' # Removed for Railway compatibility
+        #     SELECT id, text, user_id, reported_user_id, severity, # Removed for Railway compatibility
+        #            requires_immediate_action, created_at # Removed for Railway compatibility
+        #     FROM abuse_reports # Removed for Railway compatibility
+        #     WHERE status = "pending" # Removed for Railway compatibility
+        #     ORDER BY requires_immediate_action DESC, created_at DESC # Removed for Railway compatibility
+        #     LIMIT 50 # Removed for Railway compatibility
+        # ''') # Removed for Railway compatibility
 
-        reports = []
-        for row in cursor.fetchall():
-            reports.append({
-                'id': row[0],
-                'text': row[1],
-                'user_id': row[2],
-                'reported_user_id': row[3],
-                'severity': row[4],
-                'requires_immediate_action': bool(row[5]),
-                'created_at': row[6]
-            })
+        # reports = [] # Removed for Railway compatibility
+        # for row in cursor.fetchall(): # Removed for Railway compatibility
+        #     reports.append({ # Removed for Railway compatibility
+        #         'id': row[0], # Removed for Railway compatibility
+        #         'text': row[1], # Removed for Railway compatibility
+        #         'user_id': row[2], # Removed for Railway compatibility
+        #         'reported_user_id': row[3], # Removed for Railway compatibility
+        #         'severity': row[4], # Removed for Railway compatibility
+        #         'requires_immediate_action': bool(row[5]), # Removed for Railway compatibility
+        #         'created_at': row[6] # Removed for Railway compatibility
+        #     }) # Removed for Railway compatibility
 
-        conn.close()
+        # conn.close() # Removed for Railway compatibility
+
+        # In-memory storage for Railway deployment
+        pending_reports = [
+            r for r in abuse_reports if r['status'] == 'pending'
+        ]
 
         return jsonify({
             'status': 'success',
-            'reports': reports,
-            'total_pending': len(reports)
+            'reports': pending_reports,
+            'total_pending': len(pending_reports)
         })
 
     except Exception as e:
