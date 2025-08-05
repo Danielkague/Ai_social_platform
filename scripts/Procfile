@@ -1,1 +1,0 @@
-web: python3 -m venv /app/venv && /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --only-binary=all -r requirements.txt && /app/venv/bin/python ml-integration-example.py 

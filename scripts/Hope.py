@@ -8,7 +8,7 @@ import logging
 import os
 import pickle
 import re
-# import sqlite3  # Removed for Railway compatibility
+import sqlite3
 import random
 from datetime import datetime
 from threading import Lock
@@ -29,22 +29,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configure CORS properly for Next.js integration
-CORS(app, origins=["http://localhost:3000", "https://*.vercel.app", "https://*.railway.app"],
+CORS(app, origins=["http://localhost:3000", "https://*.vercel.app", "https://*.railway.app", "https://*.onrender.com"],
      methods=["GET", "POST"],
      allow_headers=["Content-Type"])
 
 # Thread-safe model updates
 model_lock = Lock()
 
-# In-memory storage for Railway deployment (replaces SQLite)
-hope_training_data = []
-hope_conversations = []
-hope_stats = {
-    'total_conversations': 0,
-    'crisis_detected': 0,
-    'accuracy': 0.0,
-    'last_training': None
-}
+# Database path for Hope's training data
+DB_PATH = "hope_training_data.db"
 
 class HopeCounselingAI:
     def __init__(self):
@@ -401,47 +394,47 @@ hope_ai = HopeCounselingAI()
 def init_hope_db():
     """Initialize Hope's training database"""
     try:
-        # conn = sqlite3.connect(DB_PATH) # Removed SQLite initialization
-        # cursor = conn.cursor()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
         
-        # # Create training data table
-        # cursor.execute('''
-        #     CREATE TABLE IF NOT EXISTS hope_training_data (
-        #         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #         text TEXT NOT NULL,
-        #         label TEXT NOT NULL,
-        #         category TEXT,
-        #         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        #     )
-        # ''')
+        # Create training data table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS hope_training_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                text TEXT NOT NULL,
+                label TEXT NOT NULL,
+                category TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         
-        # # Create conversation history table
-        # cursor.execute('''
-        #     CREATE TABLE IF NOT EXISTS hope_conversations (
-        #         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #         user_id TEXT,
-        #         message TEXT NOT NULL,
-        #         response TEXT NOT NULL,
-        #         concern TEXT,
-        #         crisis_level TEXT,
-        #         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        #     )
-        # ''')
+        # Create conversation history table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS hope_conversations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                message TEXT NOT NULL,
+                response TEXT NOT NULL,
+                concern TEXT,
+                crisis_level TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         
-        # # Create user profiles table
-        # cursor.execute('''
-        #     CREATE TABLE IF NOT EXISTS hope_user_profiles (
-        #         user_id TEXT PRIMARY KEY,
-        #         conversation_count INTEGER DEFAULT 0,
-        #         primary_concerns TEXT,
-        #         last_interaction DATETIME,
-        #         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        #     )
-        # ''')
+        # Create user profiles table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS hope_user_profiles (
+                user_id TEXT PRIMARY KEY,
+                conversation_count INTEGER DEFAULT 0,
+                primary_concerns TEXT,
+                last_interaction DATETIME,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         
-        # conn.commit()
-        # conn.close()
-        logger.info("Hope database initialized successfully (in-memory)")
+        conn.commit()
+        conn.close()
+        logger.info("Hope database initialized successfully")
         
     except Exception as e:
         logger.error(f"Error initializing Hope database: {e}")
@@ -497,25 +490,14 @@ def counsel_user():
         
         # Store conversation in database
         try:
-            # conn = sqlite3.connect(DB_PATH) # Removed SQLite storage
-            # cursor = conn.cursor()
-            # cursor.execute('''
-            #     INSERT INTO hope_conversations (user_id, message, response, concern, crisis_level)
-            #     VALUES (?, ?, ?, ?, ?)
-            # ''', (user_id, message, analysis['response'], analysis['primary_concern'], analysis['crisis_level']))
-            # conn.commit()
-            # conn.close()
-            hope_conversations.append({
-                'user_id': user_id,
-                'message': message,
-                'response': analysis['response'],
-                'concern': analysis['primary_concern'],
-                'crisis_level': analysis['crisis_level'],
-                'timestamp': datetime.now().isoformat()
-            })
-            hope_stats['total_conversations'] += 1
-            if analysis['requires_immediate_attention']:
-                hope_stats['crisis_detected'] += 1
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO hope_conversations (user_id, message, response, concern, crisis_level)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (user_id, message, analysis['response'], analysis['primary_concern'], analysis['crisis_level']))
+            conn.commit()
+            conn.close()
             
         except Exception as e:
             logger.warning(f"Failed to store conversation: {e}")
@@ -579,42 +561,42 @@ def train_hope():
 def get_hope_stats():
     """Get Hope's statistics and performance metrics"""
     try:
-        # conn = sqlite3.connect(DB_PATH) # Removed SQLite stats
-        # cursor = conn.cursor()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
         
-        # # Get conversation count
-        # cursor.execute('SELECT COUNT(*) FROM hope_conversations')
-        # total_conversations = cursor.fetchone()[0]
+        # Get conversation count
+        cursor.execute('SELECT COUNT(*) FROM hope_conversations')
+        total_conversations = cursor.fetchone()[0]
         
-        # # Get unique users
-        # cursor.execute('SELECT COUNT(DISTINCT user_id) FROM hope_conversations')
-        # unique_users = cursor.fetchone()[0]
+        # Get unique users
+        cursor.execute('SELECT COUNT(DISTINCT user_id) FROM hope_conversations')
+        unique_users = cursor.fetchone()[0]
         
-        # # Get crisis interventions
-        # cursor.execute('SELECT COUNT(*) FROM hope_conversations WHERE crisis_level != "none"')
-        # crisis_interventions = cursor.fetchone()[0]
+        # Get crisis interventions
+        cursor.execute('SELECT COUNT(*) FROM hope_conversations WHERE crisis_level != "none"')
+        crisis_interventions = cursor.fetchone()[0]
         
-        # # Get recent conversations
-        # cursor.execute('''
-        #     SELECT concern, COUNT(*) as count 
-        #     FROM hope_conversations 
-        #     WHERE timestamp > datetime('now', '-7 days')
-        #     GROUP BY concern 
-        #     ORDER BY count DESC 
-        #     LIMIT 5
-        # ''')
-        # recent_concerns = dict(cursor.fetchall())
+        # Get recent conversations
+        cursor.execute('''
+            SELECT concern, COUNT(*) as count 
+            FROM hope_conversations 
+            WHERE timestamp > datetime('now', '-7 days')
+            GROUP BY concern 
+            ORDER BY count DESC 
+            LIMIT 5
+        ''')
+        recent_concerns = dict(cursor.fetchall())
         
-        # conn.close()
+        conn.close()
         
         return jsonify({
-            'total_conversations': hope_stats['total_conversations'],
-            'crisis_detected': hope_stats['crisis_detected'],
-            'accuracy': hope_stats['accuracy'],
-            'last_training': hope_stats['last_training'],
+            'total_conversations': total_conversations,
+            'crisis_detected': crisis_interventions,
+            'accuracy': hope_ai.model.score(hope_ai.vectorizer.transform([""]), [0]), # Placeholder, actual accuracy is logged
+            'last_training': hope_ai.is_trained,
             'model_trained': hope_ai.is_trained,
             'active_users': len(hope_ai.user_memory),
-            'recent_concerns': {}, # No recent concerns in in-memory
+            'recent_concerns': recent_concerns,
             'timestamp': datetime.now().isoformat()
         })
         
@@ -628,32 +610,32 @@ def get_hope_conversations():
     try:
         limit = request.args.get('limit', 50, type=int)
         
-        # conn = sqlite3.connect(DB_PATH) # Removed SQLite conversation history
-        # cursor = conn.cursor()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
         
-        # cursor.execute('''
-        #     SELECT user_id, message, response, concern, crisis_level, timestamp
-        #     FROM hope_conversations
-        #     ORDER BY timestamp DESC
-        #     LIMIT ?
-        # ''', (limit,))
+        cursor.execute('''
+            SELECT user_id, message, response, concern, crisis_level, timestamp
+            FROM hope_conversations
+            ORDER BY timestamp DESC
+            LIMIT ?
+        ''', (limit,))
         
-        # conversations = []
-        # for row in cursor.fetchall():
-        #     conversations.append({
-        #         'user_id': row[0],
-        #         'message': row[1],
-        #         'response': row[2],
-        #         'concern': row[3],
-        #         'crisis_level': row[4],
-        #         'timestamp': row[5]
-        #     })
+        conversations = []
+        for row in cursor.fetchall():
+            conversations.append({
+                'user_id': row[0],
+                'message': row[1],
+                'response': row[2],
+                'concern': row[3],
+                'crisis_level': row[4],
+                'timestamp': row[5]
+            })
         
-        # conn.close()
+        conn.close()
         
         return jsonify({
-            'conversations': hope_conversations[-limit:], # Return last 'limit' conversations from in-memory
-            'count': len(hope_conversations)
+            'conversations': conversations,
+            'count': total_conversations
         })
         
     except Exception as e:

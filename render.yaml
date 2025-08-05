@@ -1,0 +1,42 @@
+services:
+  # Frontend Service (Next.js)
+  - type: web
+    name: hope-social-frontend
+    env: node
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: https://iwemxnniterxwqzdrqka.supabase.co
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3ZW14bm5pdGVyeHdxemRycWthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0NzgwMDAsImV4cCI6MjA2ODA1NDAwMH0.xa50m2oeq7efKQH-HBcf-aQSb6En5ueN-a1M1hS42_0
+      - key: NEXT_PUBLIC_ML_SERVICE_URL
+        fromService:
+          name: ml-server
+          type: web
+          property: url
+      - key: NEXT_PUBLIC_HOPE_AI_URL
+        fromService:
+          name: hope-ai-server
+          type: web
+          property: url
+
+  # ML Server (Hate Speech Detection)
+  - type: web
+    name: ml-server
+    env: python
+    buildCommand: pip install -r scripts/requirements.txt
+    startCommand: cd scripts && python ml-integration-example.py
+    envVars:
+      - key: PORT
+        value: 5000
+
+  # Hope AI Server (Psychological Support)
+  - type: web
+    name: hope-ai-server
+    env: python
+    buildCommand: pip install -r scripts/requirements.txt
+    startCommand: cd scripts && python Hope.py
+    envVars:
+      - key: PORT
+        value: 5001 
